@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.demkom58.springram.config.TelegramBotAutoConfiguration,\
+com.demkom58.springram.controller.config.TelegramMvcAutoConfiguration
