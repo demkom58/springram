@@ -16,6 +16,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.PathMatcher;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -24,6 +25,7 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
     private final Map<String, Class<?>> botControllerMap = new HashMap<>();
 
     private final CommandContainer container;
+    private final PathMatchingConfigurer pathMatchingConfigurer;
 
     public UpdateBeanPostProcessor(CommandContainer container, TelegramMvcConfigurerComposite configurerComposite) {
         final HandlerMethodArgumentResolverComposite argumentResolvers
@@ -42,7 +44,7 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
         returnHandlers.addAll(createReturnValueHandlers());
         returnValueHandlers.addAll(returnHandlers);
 
-        PathMatchingConfigurer pathMatchingConfigurer = new PathMatchingConfigurer();
+        pathMatchingConfigurer = new PathMatchingConfigurer();
         configurerComposite.configurePathMatcher(pathMatchingConfigurer);
         container.setPathMatchingConfigurer(pathMatchingConfigurer);
 
@@ -98,6 +100,18 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
                 = ObjectUtils.isEmpty(controller.value()) ? new String[]{""} : controller.value();
         final String[] mappingValues
                 = ObjectUtils.isEmpty(mapping.value()) ? new String[]{""} : mapping.value();
+
+        final PathMatcher pathMatcher = pathMatchingConfigurer.getPathMatcher();
+        for (String mappingValue : mappingValues) {
+            final String[] cmd = mappingValue.split(" ", 2);
+            final boolean isPattern = pathMatcher.isPattern(cmd[0]);
+            if (isPattern) {
+                throw new IllegalArgumentException(
+                        "CommandMapping method with mappings (" + String.join(", ", mappingValue) + ") in class "
+                        + bean.getClass().getName() + " can't has pattern as first value!"
+                );
+            }
+        }
 
         for (String headPath : controllerValues) {
             for (String mappedPath : mappingValues) {
