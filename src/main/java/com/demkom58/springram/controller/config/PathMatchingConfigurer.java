@@ -1,6 +1,6 @@
 package com.demkom58.springram.controller.config;
 
-import org.springframework.util.AntPathMatcher;
+import com.demkom58.springram.util.QuotingAntPathMatcher;
 import org.springframework.util.PathMatcher;
 
 public class PathMatchingConfigurer {
@@ -8,7 +8,7 @@ public class PathMatchingConfigurer {
     private PathMatcher pathMatcher;
 
     public PathMatchingConfigurer() {
-        AntPathMatcher pathMatcher = new AntPathMatcher(" ");
+        QuotingAntPathMatcher pathMatcher = new QuotingAntPathMatcher(" ");
         pathMatcher.setCaseSensitive(false);
         this.pathMatcher = pathMatcher;
     }

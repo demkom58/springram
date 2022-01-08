@@ -5,18 +5,15 @@ import com.demkom58.springram.controller.UpdateBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
 @Configuration
+@Import(CommandContainer.class)
 public class TelegramMvcAutoConfiguration {
     private final TelegramMvcConfigurerComposite configurerComposite = new TelegramMvcConfigurerComposite();
-
-    @Bean
-    public CommandContainer commandContainer() {
-        return new CommandContainer();
-    }
 
     @Bean
     public UpdateBeanPostProcessor updateBeanPostProcessor(CommandContainer container) {
