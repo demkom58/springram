@@ -144,6 +144,10 @@ public class CommandContainer {
             return null;
         }
 
+        if (pathMatchingConfigurer.isCommandSlashMatch() && message.startsWith("/")) {
+            message = message.substring(1);
+        }
+
         final String[] line = message.split(" ", 2);
         final String[] commandParts = line[0].split("@", 2);
         if (commandParts.length == 2) {
