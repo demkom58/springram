@@ -25,7 +25,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
     }
 
     @Test
-    void addAndIsSupported() {
+    void isSupported_valid_success() {
         final var handlers = new HandlerMethodReturnValueHandlerComposite();
 
         // check for emptiness of new composite
@@ -42,7 +42,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
     }
 
     @Test
-    void resolveTest() throws Exception {
+    void handle_valid_success() throws Exception {
         final var handlers = new HandlerMethodReturnValueHandlerComposite();
 
         final TelegramMessage message = mock(TelegramMessage.class);

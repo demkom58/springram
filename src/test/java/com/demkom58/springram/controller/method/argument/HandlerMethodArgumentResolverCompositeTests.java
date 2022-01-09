@@ -24,7 +24,7 @@ class HandlerMethodArgumentResolverCompositeTests {
     HandlerMethodArgumentResolverCompositeTests() throws NoSuchMethodException {}
 
     @Test
-    void addAndIsSupported() {
+    void isSupported_valid_success() {
         final var resolvers = new HandlerMethodArgumentResolverComposite();
 
         // check for emptiness of new composite
@@ -41,7 +41,7 @@ class HandlerMethodArgumentResolverCompositeTests {
     }
 
     @Test
-    void resolveTest() throws Exception {
+    void resolve() throws Exception {
         final var resolvers = new HandlerMethodArgumentResolverComposite();
 
         final TelegramMessage message = mock(TelegramMessage.class);
