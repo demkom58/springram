@@ -1,7 +1,7 @@
 package com.demkom58.springram.config;
 
 import com.demkom58.springram.TelegramLongPollingMvcBot;
-import com.demkom58.springram.controller.CommandContainer;
+import com.demkom58.springram.controller.TelegramCommandDispatcher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Configuration
-@Import({TelegramProperties.class, TelegramBotsApiFactory.class, CommandContainer.class})
+@Import({TelegramProperties.class, TelegramBotsApiFactory.class, TelegramCommandDispatcher.class})
 public class TelegramBotApiConfig {
     private final TelegramBotsApiFactory apiFactory;
 
@@ -29,7 +29,7 @@ public class TelegramBotApiConfig {
     @ConditionalOnMissingBean(TelegramLongPollingBot.class)
     public TelegramLongPollingBot defaultLongPollingBot(@Value("${bot.token}") String token,
                                                         @Value("${bot.username}") String username,
-                                                        CommandContainer container) {
-        return new TelegramLongPollingMvcBot(username, token, container);
+                                                        TelegramCommandDispatcher commandDispatcher) {
+        return new TelegramLongPollingMvcBot(username, token, commandDispatcher);
     }
 }

@@ -1,18 +1,18 @@
 package com.demkom58.springram;
 
-import com.demkom58.springram.controller.CommandContainer;
+import com.demkom58.springram.controller.TelegramCommandDispatcher;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class TelegramLongPollingMvcBot extends TelegramLongPollingBot {
     private final String botUsername;
     private final String botToken;
-    private final CommandContainer container;
+    private final TelegramCommandDispatcher commandDispatcher;
 
-    public TelegramLongPollingMvcBot(String botUsername, String botToken, CommandContainer container) {
+    public TelegramLongPollingMvcBot(String botUsername, String botToken, TelegramCommandDispatcher commandDispatcher) {
         this.botUsername = botUsername;
         this.botToken = botToken;
-        this.container = container;
+        this.commandDispatcher = commandDispatcher;
     }
 
     @Override
@@ -25,14 +25,10 @@ public class TelegramLongPollingMvcBot extends TelegramLongPollingBot {
         return botToken;
     }
 
-    public CommandContainer getContainer() {
-        return container;
-    }
-
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            container.handle(update, this);
+            commandDispatcher.dispatch(update, this);
         } catch (Exception e) {
             e.printStackTrace();
         }

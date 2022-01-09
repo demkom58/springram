@@ -1,24 +1,19 @@
 package com.demkom58.springram.controller;
 
+import com.demkom58.springram.controller.annotation.BotController;
+import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.message.MessageType;
-import com.demkom58.springram.controller.message.TelegramMessage;
 import com.demkom58.springram.controller.method.HandlerMapping;
 import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.TelegramMessageHandlerMethod;
-import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
-import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandlerComposite;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.bots.AbsSender;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -40,36 +35,46 @@ public class CommandContainer {
 
     private PathMatchingConfigurer pathMatchingConfigurer = new PathMatchingConfigurer();
 
-    private HandlerMethodReturnValueHandlerComposite returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-    private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
+    public void addMethod(Object bean, Method method) {
+        final BotController controller = bean.getClass().getAnnotation(BotController.class);
+        final CommandMapping mapping = method.getAnnotation(CommandMapping.class);
 
-    public PathMatchingConfigurer getPathMatchingConfigurer() {
-        return pathMatchingConfigurer;
+        final Set<String> paths = new HashSet<>();
+
+        final String[] controllerValues
+                = ObjectUtils.isEmpty(controller.value()) ? new String[]{""} : controller.value();
+        final String[] mappingValues
+                = ObjectUtils.isEmpty(mapping.value()) ? new String[]{""} : mapping.value();
+
+        final PathMatcher pathMatcher = pathMatchingConfigurer.getPathMatcher();
+        for (String mappingValue : mappingValues) {
+            final String[] cmd = mappingValue.split(" ", 2);
+            final boolean isPattern = pathMatcher.isPattern(cmd[0]);
+            if (isPattern) {
+                throw new IllegalArgumentException(
+                        "CommandMapping method with mappings (" + String.join(", ", mappingValue) + ") in class "
+                                + bean.getClass().getName() + " can't has pattern as first value!"
+                );
+            }
+        }
+
+        for (String headPath : controllerValues) {
+            for (String mappedPath : mappingValues) {
+                paths.add(headPath.toLowerCase() + mappedPath.toLowerCase());
+            }
+        }
+
+        for (String path : paths) {
+            final var handlerMapping = new HandlerMapping(mapping.event(), path);
+            final var handlerMethod = new TelegramMessageHandlerMethod(handlerMapping, bean, method);
+            addHandlerMethod(path, handlerMethod);
+        }
+
     }
 
-    public void setPathMatchingConfigurer(PathMatchingConfigurer pathMatchingConfigurer) {
-        this.pathMatchingConfigurer = pathMatchingConfigurer;
-    }
-
-    public HandlerMethodReturnValueHandlerComposite getReturnValueHandlers() {
-        return returnValueHandlers;
-    }
-
-    public void setReturnValueHandlers(HandlerMethodReturnValueHandlerComposite returnValueHandlers) {
-        this.returnValueHandlers = returnValueHandlers;
-    }
-
-    public HandlerMethodArgumentResolverComposite getArgumentResolvers() {
-        return argumentResolvers;
-    }
-
-    public void setArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
-        this.argumentResolvers = argumentResolvers;
-    }
-
-    public void addBotController(String path, TelegramMessageHandlerMethod controller) {
-        final HandlerMapping mapping = controller.getMapping();
-        final Method mtd = controller.getMethod();
+    public void addHandlerMethod(String path, TelegramMessageHandlerMethod handlerMethod) {
+        final HandlerMapping mapping = handlerMethod.getMapping();
+        final Method mtd = handlerMethod.getMethod();
         final MessageType[] eventTypes = mapping.messageTypes();
 
         final PathMatcher pathMatcher = getPathMatcher();
@@ -78,7 +83,7 @@ public class CommandContainer {
             if (canHasPath) {
                 log.trace("Adding method handler for message type {} with path: {}", messageType, path);
                 if (pathMatcher.isPattern(path)) {
-                    final var prev = patternMap.get(messageType).putIfAbsent(path, controller);
+                    final var prev = patternMap.get(messageType).putIfAbsent(path, handlerMethod);
                     if (prev != null) {
                         throw new IllegalStateException(
                                 "Cant register handler with pattern mapping '" + path
@@ -86,7 +91,7 @@ public class CommandContainer {
                         );
                     }
                 } else {
-                    final var prev = directMap.get(messageType).putIfAbsent(path, controller);
+                    final var prev = directMap.get(messageType).putIfAbsent(path, handlerMethod);
                     if (prev != null) {
                         throw new IllegalStateException(
                                 "Cant register handler with direct mapping '" + path
@@ -98,73 +103,8 @@ public class CommandContainer {
         }
     }
 
-    public void handle(Update update, AbsSender bot) throws Exception {
-        Objects.requireNonNull(update, "Update can't be null!");
-        Objects.requireNonNull(bot, "Receiver bot can't be null!");
-
-        final TelegramMessage message = TelegramMessage.from(update);
-        if (message == null) {
-            return;
-        }
-
-        final MessageType eventType = message.getEventType();
-        final String messageText = message.getText();
-        final String commandText = toCommand(bot, messageText);
-        if (commandText == null) {
-            return;
-        }
-
-        TelegramMessageHandler handler = findControllers(eventType, commandText);
-        if (handler == null) {
-            return;
-        }
-
-        final Map<String, String> variables = getPathMatcher()
-                .extractUriTemplateVariables(handler.getMapping().value(), commandText);
-
-        message.setAttribute("variables", variables);
-        final Object result = handler.invoke(argumentResolvers, message, bot, message, bot);
-        if (result == null) {
-            return;
-        }
-
-        final MethodParameter returnType = handler.getReturnType();
-        final boolean supported = returnValueHandlers.isSupported(returnType);
-        if (supported) {
-            returnValueHandlers.handle(returnType, message, bot, result);
-        } else {
-            throw new UnsupportedOperationException("Unsupported return type '" +
-                    returnType.getParameterType().getName() + "' in method '" + returnType.getMethod() + "'");
-        }
-    }
-
     @Nullable
-    private String toCommand(AbsSender bot, String message) throws TelegramApiException {
-        if (!StringUtils.hasText(message)) {
-            return null;
-        }
-
-        if (pathMatchingConfigurer.isCommandSlashMatch() && message.startsWith("/")) {
-            message = message.substring(1);
-        }
-
-        final String[] line = message.split(" ", 2);
-        final String[] commandParts = line[0].split("@", 2);
-        if (commandParts.length == 2) {
-            final String botUserName = bot.getMe().getUserName();
-            final boolean forMe = commandParts[1].equalsIgnoreCase(botUserName);
-            if (!forMe) {
-                return null;
-            }
-
-            return commandParts[0] + " " + (line.length == 2 ? line[1] : "");
-        } else {
-            return message;
-        }
-    }
-
-    @Nullable
-    private TelegramMessageHandler findControllers(MessageType method, String command) {
+    public TelegramMessageHandler findControllers(MessageType method, String command) {
         var directHandler = directMap.get(method).get(command.toLowerCase());
         if (directHandler != null) {
             return directHandler;
@@ -194,8 +134,15 @@ public class CommandContainer {
         return handlers.get(0);
     }
 
-    public PathMatcher getPathMatcher() {
+    private PathMatcher getPathMatcher() {
         return pathMatchingConfigurer.getPathMatcher();
     }
 
+    public PathMatchingConfigurer getPathMatchingConfigurer() {
+        return pathMatchingConfigurer;
+    }
+
+    public void setPathMatchingConfigurer(PathMatchingConfigurer pathMatchingConfigurer) {
+        this.pathMatchingConfigurer = pathMatchingConfigurer;
+    }
 }
