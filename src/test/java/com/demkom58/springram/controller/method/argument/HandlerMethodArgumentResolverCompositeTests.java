@@ -1,13 +1,8 @@
 package com.demkom58.springram.controller.method.argument;
 
-import com.demkom58.springram.TelegramLongPollingMvcBot;
-import com.demkom58.springram.controller.CommandContainer;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
-import com.demkom58.springram.controller.message.MessageType;
 import com.demkom58.springram.controller.message.TelegramMessage;
-import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,7 +12,8 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
