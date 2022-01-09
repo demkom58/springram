@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class QuotingAntPathMatcherTests {
     @Test
-    void tokenizePath() {
+    void tokenizePath_valid_success() {
         final var matcher = new QuotingAntPathMatcher(" ");
         assertArrayEquals(new String[]{"mm", "m", "mmm", "mmmm mmm"}, matcher.tokenizePath("mm m \"mmm\" \"mmmm mmm\""));
         assertArrayEquals(new String[]{}, matcher.tokenizePath("\"\" \"     \""));

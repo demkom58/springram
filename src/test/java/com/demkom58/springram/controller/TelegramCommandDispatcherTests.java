@@ -56,7 +56,7 @@ class TelegramCommandDispatcherTests {
     }
 
     @Test
-    void dispatch_textMessage() throws Exception {
+    void dispatch_textMessage_success() throws Exception {
         final var bot = mock(AbsSender.class);
         dispatcher.dispatch(update, bot);
 
