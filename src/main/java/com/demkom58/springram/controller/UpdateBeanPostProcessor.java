@@ -4,8 +4,6 @@ import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.config.TelegramMvcConfigurerComposite;
-import com.demkom58.springram.controller.method.HandlerMapping;
-import com.demkom58.springram.controller.method.TelegramMessageHandlerMethod;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolver;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
@@ -15,19 +13,17 @@ import com.demkom58.springram.controller.method.result.impl.SendMessageHandlerMe
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.PathMatcher;
 
 import java.lang.reflect.Method;
 import java.util.*;
 
 public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
     private final Map<String, Class<?>> botControllerMap = new HashMap<>();
+    private final CommandContainer commandContainer;
 
-    private final CommandContainer container;
-    private final PathMatchingConfigurer pathMatchingConfigurer;
-
-    public UpdateBeanPostProcessor(CommandContainer container, TelegramMvcConfigurerComposite configurerComposite) {
+    public UpdateBeanPostProcessor(TelegramCommandDispatcher commandDispatcher,
+                                   CommandContainer commandContainer,
+                                   TelegramMvcConfigurerComposite configurerComposite) {
         final HandlerMethodArgumentResolverComposite argumentResolvers
                 = new HandlerMethodArgumentResolverComposite();
 
@@ -44,13 +40,13 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
         returnHandlers.addAll(createReturnValueHandlers());
         returnValueHandlers.addAll(returnHandlers);
 
-        pathMatchingConfigurer = new PathMatchingConfigurer();
-        configurerComposite.configurePathMatcher(pathMatchingConfigurer);
-        container.setPathMatchingConfigurer(pathMatchingConfigurer);
+        commandDispatcher.setReturnValueHandlers(returnValueHandlers);
+        commandDispatcher.setArgumentResolvers(argumentResolvers);
 
-        this.container = container;
-        container.setReturnValueHandlers(returnValueHandlers);
-        container.setArgumentResolvers(argumentResolvers);
+        this.commandContainer = commandContainer;
+        PathMatchingConfigurer pathMatchingConfigurer = new PathMatchingConfigurer();
+        configurerComposite.configurePathMatcher(pathMatchingConfigurer);
+        commandContainer.setPathMatchingConfigurer(pathMatchingConfigurer);
     }
 
     private List<HandlerMethodArgumentResolver> createArgumentResolvers() {
@@ -85,46 +81,9 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
 
         Arrays.stream(original.getMethods())
                 .filter(method -> method.isAnnotationPresent(CommandMapping.class))
-                .forEach((Method method) -> addHandlerMethod(bean, method));
+                .forEach((Method method) -> commandContainer.addMethod(bean, method));
 
         return bean;
-    }
-
-    private void addHandlerMethod(Object bean, Method method) {
-        final BotController controller = bean.getClass().getAnnotation(BotController.class);
-        final CommandMapping mapping = method.getAnnotation(CommandMapping.class);
-
-        final Set<String> paths = new HashSet<>();
-
-        final String[] controllerValues
-                = ObjectUtils.isEmpty(controller.value()) ? new String[]{""} : controller.value();
-        final String[] mappingValues
-                = ObjectUtils.isEmpty(mapping.value()) ? new String[]{""} : mapping.value();
-
-        final PathMatcher pathMatcher = pathMatchingConfigurer.getPathMatcher();
-        for (String mappingValue : mappingValues) {
-            final String[] cmd = mappingValue.split(" ", 2);
-            final boolean isPattern = pathMatcher.isPattern(cmd[0]);
-            if (isPattern) {
-                throw new IllegalArgumentException(
-                        "CommandMapping method with mappings (" + String.join(", ", mappingValue) + ") in class "
-                        + bean.getClass().getName() + " can't has pattern as first value!"
-                );
-            }
-        }
-
-        for (String headPath : controllerValues) {
-            for (String mappedPath : mappingValues) {
-                paths.add(headPath.toLowerCase() + mappedPath.toLowerCase());
-            }
-        }
-
-        for (String path : paths) {
-            final var handlerMapping = new HandlerMapping(mapping.event(), path);
-            final var handlerMethod = new TelegramMessageHandlerMethod(handlerMapping, bean, method);
-            container.addBotController(path, handlerMethod);
-        }
-
     }
 
     @Override
