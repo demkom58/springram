@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TelegramCommandDispatcherTests {
+class TelegramCommandDispatcherTests {
     private CommandContainer container;
     private TelegramCommandDispatcher dispatcher;
     private HandlerMethodReturnValueHandlerComposite handlers;
