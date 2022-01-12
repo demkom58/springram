@@ -12,3 +12,7 @@
 Springram is a library for working with telegram using the spring
 framework and spring boot. This library gives you the ability to
 use controllers like in spring web-mvc.
+
+## How to use
+
+To understand how to work with this library, you can see the [wiki](https://github.com/demkom58/springram/wiki) section.
