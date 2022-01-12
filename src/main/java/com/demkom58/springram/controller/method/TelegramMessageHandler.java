@@ -6,6 +6,13 @@ import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
+/**
+ * Interface to describe handler methods, like
+ * controller's handler methods.
+ *
+ * @author Max Demydenko
+ * @since 0.1
+ */
 public interface TelegramMessageHandler {
     @Nullable
     Object invoke(HandlerMethodArgumentResolverComposite resolvers,
