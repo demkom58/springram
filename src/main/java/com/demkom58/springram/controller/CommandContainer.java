@@ -18,6 +18,12 @@ import org.springframework.util.PathMatcher;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * Container for searching handler methods and registering.
+ *
+ * @author Max Demydenko
+ * @since 0.1
+ */
 @Component
 public class CommandContainer {
     private static final Logger log = LoggerFactory.getLogger(CommandContainer.class);
@@ -35,6 +41,12 @@ public class CommandContainer {
 
     private PathMatchingConfigurer pathMatchingConfigurer = new PathMatchingConfigurer();
 
+    /**
+     * Registers handler method of the specified bean.
+     *
+     * @param bean that owns method
+     * @param method the handler method that should be registered
+     */
     public void addMethod(Object bean, Method method) {
         final BotController controller = bean.getClass().getAnnotation(BotController.class);
         final CommandMapping mapping = method.getAnnotation(CommandMapping.class);
@@ -72,7 +84,8 @@ public class CommandContainer {
 
     }
 
-    public void addHandlerMethod(String path, TelegramMessageHandlerMethod handlerMethod) {
+    private void addHandlerMethod(String path,
+                                 TelegramMessageHandlerMethod handlerMethod) throws IllegalStateException {
         final HandlerMapping mapping = handlerMethod.getMapping();
         final Method mtd = handlerMethod.getMethod();
         final MessageType[] eventTypes = mapping.messageTypes();
@@ -103,8 +116,16 @@ public class CommandContainer {
         }
     }
 
+    /**
+     * Finds method handler for specified
+     * method and command string.
+     *
+     * @param method  method of incomming command
+     * @param command text of command
+     * @return method handler, that can be null
+     */
     @Nullable
-    public TelegramMessageHandler findControllers(MessageType method, String command) {
+    public TelegramMessageHandler findHandler(MessageType method, String command) {
         var directHandler = directMap.get(method).get(command.toLowerCase());
         if (directHandler != null) {
             return directHandler;

@@ -8,6 +8,14 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Composite {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolver}
+ * that searches first supported resolver,
+ * caches it and returns resolved argument.
+ *
+ * @author Max Demydenko
+ * @since 0.1
+ */
 public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
     private final List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
     private final Map<MethodParameter, HandlerMethodArgumentResolver> cachedResolvers = new ConcurrentHashMap<>();
