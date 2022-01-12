@@ -2,6 +2,13 @@ package com.demkom58.springram.controller.message;
 
 import java.util.Arrays;
 
+/**
+ * Message type for determining the Telegram's
+ * update type.
+ *
+ * @author Max Demydenko
+ * @since 0.1
+ */
 public enum MessageType {
     TEXT_MESSAGE(true),
     TEXT_MESSAGE_EDIT(true),

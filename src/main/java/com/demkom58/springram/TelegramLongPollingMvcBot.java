@@ -4,6 +4,13 @@ import com.demkom58.springram.controller.TelegramCommandDispatcher;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+/**
+ * Default implementation of {@link TelegramLongPollingBot TelegramLongPollingBot}
+ * for Springram that pass updates to {@link TelegramCommandDispatcher CommandDispatcher}
+ *
+ * @author Max Demydenko
+ * @since 0.1
+ */
 public class TelegramLongPollingMvcBot extends TelegramLongPollingBot {
     private final String botUsername;
     private final String botToken;

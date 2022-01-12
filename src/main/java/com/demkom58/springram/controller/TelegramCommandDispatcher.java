@@ -42,7 +42,7 @@ public class TelegramCommandDispatcher {
             return;
         }
 
-        TelegramMessageHandler handler = commandContainer.findControllers(eventType, commandText);
+        TelegramMessageHandler handler = commandContainer.findHandler(eventType, commandText);
         if (handler == null) {
             return;
         }

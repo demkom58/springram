@@ -10,6 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Wrapper for {@link Update update} with simplified
+ * access to main attributes, such as text, author, chat.
+ *
+ * @author Max Demydenko
+ * @since 0.1
+ */
 public class TelegramMessage {
     private final Update update;
 

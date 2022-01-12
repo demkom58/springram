@@ -69,12 +69,12 @@ class CommandContainerTests {
     void findControllers_getRegisteredMethod_success() throws Exception {
         final TestController testController = new TestController();
         container.addMethod(testController, TestController.class.getDeclaredMethod("test", String.class));
-        assertNotNull(container.findControllers(MessageType.TEXT_MESSAGE, "test test"));
+        assertNotNull(container.findHandler(MessageType.TEXT_MESSAGE, "test test"));
     }
 
     @Test
     void findControllers_getNotRegisteredMethod_null() throws Exception {
-        assertNull(container.findControllers(MessageType.TEXT_MESSAGE, "test test"));
+        assertNull(container.findHandler(MessageType.TEXT_MESSAGE, "test test"));
     }
 
 }
