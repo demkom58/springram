@@ -1,6 +1,7 @@
 package com.demkom58.springram.controller.method.result;
 
 import com.demkom58.springram.controller.message.TelegramMessage;
+import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -11,6 +12,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Composite {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandler}
+ * that searches first supported resolver and
+ * then call handle method.
+ *
+ * @author Max Demydenko
+ * @since 0.1
+ */
 public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
     private final List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 

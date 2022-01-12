@@ -8,6 +8,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Ant path matcher with custom tokenization of
+ * quoted parts. It is useful for situations when
+ * you need to ignore path separator.
+ *
+ * @author Max Demydenko
+ * @since 0.2
+ */
 public class QuotingAntPathMatcher extends AntPathMatcher {
     private final Pattern quotePattern = Pattern.compile("\"([^\"\\\\]*(?:\\\\.[^\"\\\\]*)*)\"|(\\S+)");
 
