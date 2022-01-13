@@ -1,11 +1,9 @@
 package com.demkom58.springram.controller.annotation;
 
 import com.demkom58.springram.controller.message.MessageType;
+import org.springframework.core.annotation.AliasFor;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation that marks method as command handler.
@@ -15,10 +13,24 @@ import java.lang.annotation.Target;
  * @author Max Demydenko
  * @since 0.1
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface CommandMapping {
-    String[] value() default {""};
+    /**
+     * Alias for {@link CommandMapping#path()}.
+     */
+    @AliasFor("path")
+    String[] value() default {};
 
-    MessageType[] event() default {MessageType.TEXT_MESSAGE};
+    /**
+     * Describes path of the command.
+     */
+    @AliasFor("value")
+    String[] path() default {};
+
+    /**
+     * Events that will be listened, by default is {@link MessageType#TEXT_MESSAGE}
+     */
+    MessageType[] event() default {};
 }
