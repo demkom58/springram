@@ -1,9 +1,8 @@
 package com.demkom58.springram.controller.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.core.annotation.AliasFor;
+
+import java.lang.annotation.*;
 
 /**
  * Marks argument as path variable, that specified
@@ -15,6 +14,18 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
+@Documented
 public @interface PathVariable {
+
+    /**
+     * Alias for name
+     */
+    @AliasFor("name")
     String value() default "";
+
+    /**
+     * Describes name of path variable
+     */
+    @AliasFor("value")
+    String name() default "";
 }

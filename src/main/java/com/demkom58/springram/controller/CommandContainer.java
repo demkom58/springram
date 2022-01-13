@@ -10,6 +10,7 @@ import com.demkom58.springram.controller.method.TelegramMessageHandlerMethod;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -27,6 +28,7 @@ import java.util.*;
 @Component
 public class CommandContainer {
     private static final Logger log = LoggerFactory.getLogger(CommandContainer.class);
+    private static final MessageType[] TEXT_MESSAGE_EVENTS  = new MessageType[]{MessageType.TEXT_MESSAGE};
 
     private final Map<MessageType, Map<String, TelegramMessageHandler>> directMap =
             Maps.newEnumMap(new HashMap<MessageType, Map<String, TelegramMessageHandler>>() {{
@@ -44,40 +46,68 @@ public class CommandContainer {
     /**
      * Registers handler method of the specified bean.
      *
-     * @param bean that owns method
+     * @param bean   that owns method
      * @param method the handler method that should be registered
      */
     public void addMethod(Object bean, Method method) {
-        final BotController controller = bean.getClass().getAnnotation(BotController.class);
-        final CommandMapping mapping = method.getAnnotation(CommandMapping.class);
+        final Class<?> beanClass = bean.getClass();
+
+        final BotController controller = AnnotationUtils.findAnnotation(beanClass, BotController.class);
+        assert controller != null;
+
+        final CommandMapping typeMapping = AnnotationUtils.findAnnotation(beanClass, CommandMapping.class);
+        final CommandMapping methodMapping = AnnotationUtils.findAnnotation(method, CommandMapping.class);
+        assert methodMapping != null;
 
         final Set<String> paths = new HashSet<>();
 
-        final String[] controllerValues
-                = ObjectUtils.isEmpty(controller.value()) ? new String[]{""} : controller.value();
         final String[] mappingValues
-                = ObjectUtils.isEmpty(mapping.value()) ? new String[]{""} : mapping.value();
+                = ObjectUtils.isEmpty(methodMapping.value()) ? new String[]{""} : methodMapping.value();
+
+        if (typeMapping != null) {
+            for (String headPath : typeMapping.value()) {
+                for (String mappedPath : mappingValues) {
+                    final String ltHeadPath = headPath.toLowerCase().trim();
+                    final String ltMappedPath = mappedPath.toLowerCase().trim();
+                    paths.add(ltHeadPath + " " + ltMappedPath);
+                }
+            }
+        } else {
+            for (String mappedPath : mappingValues) {
+                paths.add(mappedPath.toLowerCase());
+            }
+        }
 
         final PathMatcher pathMatcher = pathMatchingConfigurer.getPathMatcher();
-        for (String mappingValue : mappingValues) {
+        for (String mappingValue : paths) {
             final String[] cmd = mappingValue.split(" ", 2);
             final boolean isPattern = pathMatcher.isPattern(cmd[0]);
             if (isPattern) {
                 throw new IllegalArgumentException(
                         "CommandMapping method with mappings (" + String.join(", ", mappingValue) + ") in class "
-                                + bean.getClass().getName() + " can't has pattern as first value!"
+                                + beanClass.getName() + " can't has pattern as first value!"
                 );
             }
         }
 
-        for (String headPath : controllerValues) {
-            for (String mappedPath : mappingValues) {
-                paths.add(headPath.toLowerCase() + mappedPath.toLowerCase());
-            }
+        if (paths.isEmpty()) {
+            paths.add("");
         }
 
         for (String path : paths) {
-            final var handlerMapping = new HandlerMapping(mapping.event(), path);
+            MessageType[] events = methodMapping.event();
+
+            if (ObjectUtils.isEmpty(events) && typeMapping != null) {
+                events = typeMapping.event();
+            }
+
+            if (ObjectUtils.isEmpty(events)) {
+                events = TEXT_MESSAGE_EVENTS;
+            }
+
+            System.out.println("{path: \"" + path + "\", events: " + Arrays.toString(events) + "}");
+
+            final var handlerMapping = new HandlerMapping(events, path);
             final var handlerMethod = new TelegramMessageHandlerMethod(handlerMapping, bean, method);
             addHandlerMethod(path, handlerMethod);
         }
@@ -85,7 +115,7 @@ public class CommandContainer {
     }
 
     private void addHandlerMethod(String path,
-                                 TelegramMessageHandlerMethod handlerMethod) throws IllegalStateException {
+                                  TelegramMessageHandlerMethod handlerMethod) throws IllegalStateException {
         final HandlerMapping mapping = handlerMethod.getMapping();
         final Method mtd = handlerMethod.getMethod();
         final MessageType[] eventTypes = mapping.messageTypes();
