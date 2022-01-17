@@ -45,10 +45,6 @@ publishing {
         maven(MavenPublication) {
             from components.java
         }
-
-        gpr(MavenPublication) {
-            from(components.java)
-        }
     }
 
     repositories {
