@@ -3,7 +3,7 @@ package com.demkom58.springram.controller;
 import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.config.PathMatchingConfigurer;
-import com.demkom58.springram.controller.config.TelegramMvcConfigurerComposite;
+import com.demkom58.springram.controller.config.SpringramConfigurerComposite;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolver;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
@@ -23,7 +23,7 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
 
     public UpdateBeanPostProcessor(TelegramCommandDispatcher commandDispatcher,
                                    CommandContainer commandContainer,
-                                   TelegramMvcConfigurerComposite configurerComposite) {
+                                   SpringramConfigurerComposite configurerComposite) {
         final HandlerMethodArgumentResolverComposite argumentResolvers
                 = new HandlerMethodArgumentResolverComposite();
 

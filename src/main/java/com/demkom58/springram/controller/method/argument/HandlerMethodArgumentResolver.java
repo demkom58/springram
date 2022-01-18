@@ -1,5 +1,6 @@
 package com.demkom58.springram.controller.method.argument;
 
+import com.demkom58.springram.controller.config.SpringramConfigurer;
 import com.demkom58.springram.controller.message.TelegramMessage;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -11,7 +12,7 @@ import java.util.List;
  * Resolver interface for providing arguments to handler
  * methods. For creating custom resolver implement it,
  * then specify it in your
- * {@link com.demkom58.springram.controller.config.TelegramMvcConfigurer#configureArgumentResolvers(List)}
+ * {@link SpringramConfigurer#configureArgumentResolvers(List)}
  *
  * @author Max Demydenko
  * @since 0.1
