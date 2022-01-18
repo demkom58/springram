@@ -13,8 +13,8 @@ import java.util.List;
 
 @Configuration
 @Import({TelegramCommandDispatcher.class, CommandContainer.class})
-public class TelegramMvcAutoConfiguration {
-    private final TelegramMvcConfigurerComposite configurerComposite = new TelegramMvcConfigurerComposite();
+public class SpringramAutoConfiguration {
+    private final SpringramConfigurerComposite configurerComposite = new SpringramConfigurerComposite();
 
     @Bean
     public UpdateBeanPostProcessor updateBeanPostProcessor(
@@ -24,7 +24,7 @@ public class TelegramMvcAutoConfiguration {
     }
 
     @Autowired(required = false)
-    public void addMvcConfigurers(List<TelegramMvcConfigurer> configurers) {
+    public void addMvcConfigurers(List<SpringramConfigurer> configurers) {
         if (!CollectionUtils.isEmpty(configurers)) {
             this.configurerComposite.addAll(configurers);
         }

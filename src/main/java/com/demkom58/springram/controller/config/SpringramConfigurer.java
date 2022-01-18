@@ -12,7 +12,7 @@ import java.util.List;
  * @author Max Demydenko
  * @since 0.2
  */
-public interface TelegramMvcConfigurer {
+public interface SpringramConfigurer {
 
     default void configurePathMatcher(PathMatchingConfigurer configurer) {
 

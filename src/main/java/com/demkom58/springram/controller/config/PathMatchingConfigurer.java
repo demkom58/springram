@@ -5,7 +5,7 @@ import org.springframework.util.PathMatcher;
 
 /**
  * Special class for configuration path matching for commands,
- * is used in {@link TelegramMvcConfigurer TelegramMvcConfigurer}.
+ * is used in {@link SpringramConfigurer TelegramMvcConfigurer}.
  *
  * @author Max Demydenko
  * @since 0.2
