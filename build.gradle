@@ -39,11 +39,17 @@ test {
 }
 
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = "sources"
+}
 
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
+
+            artifact sourceJar
         }
     }
 
@@ -58,4 +64,3 @@ publishing {
         }
     }
 }
-
