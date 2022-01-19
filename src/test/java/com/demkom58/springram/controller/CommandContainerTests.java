@@ -3,6 +3,7 @@ package com.demkom58.springram.controller;
 import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
+import com.demkom58.springram.controller.container.CommandContainer;
 import com.demkom58.springram.controller.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,12 +70,12 @@ class CommandContainerTests {
     void findControllers_getRegisteredMethod_success() throws Exception {
         final TestController testController = new TestController();
         container.addMethod(testController, TestController.class.getDeclaredMethod("test", String.class));
-        assertNotNull(container.findHandler(MessageType.TEXT_MESSAGE, "test test"));
+        assertNotNull(container.findHandler(MessageType.TEXT_MESSAGE, "default", "test test"));
     }
 
     @Test
     void findControllers_getNotRegisteredMethod_null() throws Exception {
-        assertNull(container.findHandler(MessageType.TEXT_MESSAGE, "test test"));
+        assertNull(container.findHandler(MessageType.TEXT_MESSAGE, "default", "test test"));
     }
 
 }

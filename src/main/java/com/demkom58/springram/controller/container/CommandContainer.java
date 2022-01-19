@@ -1,9 +1,11 @@
-package com.demkom58.springram.controller;
+package com.demkom58.springram.controller.container;
 
 import com.demkom58.springram.controller.annotation.BotController;
+import com.demkom58.springram.controller.annotation.Chain;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.message.MessageType;
+import com.demkom58.springram.controller.message.TelegramMessage;
 import com.demkom58.springram.controller.method.HandlerMapping;
 import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.TelegramMessageHandlerMethod;
@@ -17,7 +19,10 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Container for searching handler methods and registering.
@@ -28,20 +33,19 @@ import java.util.*;
 @Component
 public class CommandContainer {
     private static final Logger log = LoggerFactory.getLogger(CommandContainer.class);
-    private static final MessageType[] TEXT_MESSAGE_EVENTS  = new MessageType[]{MessageType.TEXT_MESSAGE};
+    private static final MessageType[] TEXT_MESSAGE_EVENTS = new MessageType[]{MessageType.TEXT_MESSAGE};
 
-    private final Map<MessageType, Map<String, TelegramMessageHandler>> directMap =
-            Maps.newEnumMap(new HashMap<MessageType, Map<String, TelegramMessageHandler>>() {{
-                for (MessageType value : MessageType.pathMethods())
-                    put(value, Maps.newHashMap());
-            }});
-    private final Map<MessageType, Map<String, TelegramMessageHandler>> patternMap =
-            Maps.newEnumMap(new HashMap<MessageType, Map<String, TelegramMessageHandler>>() {{
-                for (MessageType value : MessageType.pathMethods())
-                    put(value, Maps.newHashMap());
-            }});
-
+    private final Map<MessageType, ChainMap> typeHandlerMap;
     private PathMatchingConfigurer pathMatchingConfigurer = new PathMatchingConfigurer();
+
+    public CommandContainer() {
+        final Map<MessageType, ChainMap> map = new HashMap<>();
+        for (MessageType value : MessageType.pathMethods()) {
+            map.put(value, new ChainMap(pathMatchingConfigurer));
+        }
+
+        this.typeHandlerMap = Maps.newEnumMap(map);
+    }
 
     /**
      * Registers handler method of the specified bean.
@@ -58,6 +62,12 @@ public class CommandContainer {
         final CommandMapping typeMapping = AnnotationUtils.findAnnotation(beanClass, CommandMapping.class);
         final CommandMapping methodMapping = AnnotationUtils.findAnnotation(method, CommandMapping.class);
         assert methodMapping != null;
+
+        final Chain methodChain = AnnotationUtils.findAnnotation(method, Chain.class);
+
+        String[] chains = methodChain == null || ObjectUtils.isEmpty(methodChain.chain())
+                ? new String[]{"default"}
+                : methodChain.chain();
 
         final Set<String> paths = new HashSet<>();
 
@@ -94,54 +104,36 @@ public class CommandContainer {
             paths.add("");
         }
 
-        for (String path : paths) {
-            MessageType[] events = methodMapping.event();
-
-            if (ObjectUtils.isEmpty(events) && typeMapping != null) {
-                events = typeMapping.event();
-            }
-
-            if (ObjectUtils.isEmpty(events)) {
-                events = TEXT_MESSAGE_EVENTS;
-            }
-
-            System.out.println("{path: \"" + path + "\", events: " + Arrays.toString(events) + "}");
-
-            final var handlerMapping = new HandlerMapping(events, path);
-            final var handlerMethod = new TelegramMessageHandlerMethod(handlerMapping, bean, method);
-            addHandlerMethod(path, handlerMethod);
+        MessageType[] events = methodMapping.event();
+        if (ObjectUtils.isEmpty(events) && typeMapping != null) {
+            events = typeMapping.event();
+        }
+        if (ObjectUtils.isEmpty(events)) {
+            events = TEXT_MESSAGE_EVENTS;
         }
 
+        for (String chain : chains) {
+            for (String path : paths) {
+                final var handlerMapping = new HandlerMapping(events, chain, path);
+                final var handlerMethod = new TelegramMessageHandlerMethod(handlerMapping, bean, method);
+                addHandlerMethod(chain, path, handlerMethod);
+            }
+        }
     }
 
-    private void addHandlerMethod(String path,
+    private void addHandlerMethod(String chain, String path,
                                   TelegramMessageHandlerMethod handlerMethod) throws IllegalStateException {
-        final HandlerMapping mapping = handlerMethod.getMapping();
-        final Method mtd = handlerMethod.getMethod();
-        final MessageType[] eventTypes = mapping.messageTypes();
+        final MessageType[] types = handlerMethod.getMapping().messageTypes();
+        for (MessageType type : types) {
+            if (!type.canHasPath()) {
+                continue;
+            }
 
-        final PathMatcher pathMatcher = getPathMatcher();
-        for (MessageType messageType : eventTypes) {
-            final boolean canHasPath = messageType.canHasPath();
-            if (canHasPath) {
-                log.trace("Adding method handler for message type {} with path: {}", messageType, path);
-                if (pathMatcher.isPattern(path)) {
-                    final var prev = patternMap.get(messageType).putIfAbsent(path, handlerMethod);
-                    if (prev != null) {
-                        throw new IllegalStateException(
-                                "Cant register handler with pattern mapping '" + path
-                                        + "' for method '" + mtd.getName() + "'"
-                        );
-                    }
-                } else {
-                    final var prev = directMap.get(messageType).putIfAbsent(path, handlerMethod);
-                    if (prev != null) {
-                        throw new IllegalStateException(
-                                "Cant register handler with direct mapping '" + path
-                                        + "' for method '" + mtd.getName() + "'"
-                        );
-                    }
-                }
+            log.trace("Adding method handler for message type {} with path: {}", type, path);
+            final boolean registered = typeHandlerMap.get(type).put(chain, path, handlerMethod);
+            if (!registered) {
+                throw new PathAlreadyTakenException("Cant register handler with direct mapping '" + path
+                        + "' in chain '" + chain + "' for method '" + handlerMethod.getMethod().getName() + "'");
             }
         }
     }
@@ -150,39 +142,13 @@ public class CommandContainer {
      * Finds method handler for specified
      * method and command string.
      *
-     * @param method  method of incomming command
+     * @param method  method of incoming command
      * @param command text of command
      * @return method handler, that can be null
      */
     @Nullable
-    public TelegramMessageHandler findHandler(MessageType method, String command) {
-        var directHandler = directMap.get(method).get(command.toLowerCase());
-        if (directHandler != null) {
-            return directHandler;
-        }
-
-        final List<TelegramMessageHandler> handlers = new ArrayList<>();
-        final var entries = patternMap.get(method).entrySet();
-
-        final PathMatcher pathMatcher = getPathMatcher();
-        for (Map.Entry<String, TelegramMessageHandler> entry : entries) {
-            final String key = entry.getKey();
-            if (pathMatcher.match(key, command)) {
-                handlers.add(entry.getValue());
-            }
-        }
-
-        if (handlers.isEmpty()) {
-            return null;
-        }
-
-        final Comparator<String> patternComparator = pathMatcher.getPatternComparator(command);
-        handlers.sort((c1, c2) -> patternComparator.compare(
-                c1.getMapping().value(),
-                c2.getMapping().value()
-        ));
-
-        return handlers.get(0);
+    public TelegramMessageHandler findHandler(MessageType method, String chain, String command) {
+        return typeHandlerMap.get(method).get(chain, command);
     }
 
     private PathMatcher getPathMatcher() {

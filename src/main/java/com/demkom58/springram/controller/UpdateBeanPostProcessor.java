@@ -4,6 +4,7 @@ import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.config.SpringramConfigurerComposite;
+import com.demkom58.springram.controller.container.CommandContainer;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolver;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
