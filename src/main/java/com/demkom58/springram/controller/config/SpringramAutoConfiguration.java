@@ -1,6 +1,6 @@
 package com.demkom58.springram.controller.config;
 
-import com.demkom58.springram.controller.CommandContainer;
+import com.demkom58.springram.controller.container.CommandContainer;
 import com.demkom58.springram.controller.TelegramCommandDispatcher;
 import com.demkom58.springram.controller.UpdateBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;

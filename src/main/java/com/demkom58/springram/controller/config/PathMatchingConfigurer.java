@@ -1,6 +1,9 @@
 package com.demkom58.springram.controller.config;
 
+import com.demkom58.springram.controller.user.SpringramUserDetails;
+import com.demkom58.springram.controller.user.SpringramUserDetailsService;
 import com.demkom58.springram.util.QuotingAntPathMatcher;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 
 /**
@@ -13,11 +16,19 @@ import org.springframework.util.PathMatcher;
 public class PathMatchingConfigurer {
     private boolean commandSlashMatch = true;
     private PathMatcher pathMatcher;
+    private SpringramUserDetailsService userDetailsService;
 
     public PathMatchingConfigurer() {
         QuotingAntPathMatcher pathMatcher = new QuotingAntPathMatcher(" ");
         pathMatcher.setCaseSensitive(false);
         this.pathMatcher = pathMatcher;
+        this.userDetailsService = new SpringramUserDetailsService() {
+            @Nullable
+            @Override
+            public SpringramUserDetails loadById(long id) {
+                return null;
+            }
+        };
     }
 
     /**
@@ -58,5 +69,13 @@ public class PathMatchingConfigurer {
      */
     public PathMatcher getPathMatcher() {
         return pathMatcher;
+    }
+
+    public SpringramUserDetailsService getUserDetailsService() {
+        return userDetailsService;
+    }
+
+    public void setUserDetailsService(SpringramUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
 }

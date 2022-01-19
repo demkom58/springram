@@ -3,6 +3,7 @@ package com.demkom58.springram.controller;
 import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
+import com.demkom58.springram.controller.container.CommandContainer;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandlerComposite;
@@ -62,7 +63,7 @@ class TelegramCommandDispatcherTests {
 
         verify(handlers).handle(any(), any(), same(bot), any());
         verify(resolvers).resolve(any(), any(), same(bot));
-        verify(container).findHandler(any(), any());
+        verify(container).findHandler(any(), any(), any());
     }
 
 }

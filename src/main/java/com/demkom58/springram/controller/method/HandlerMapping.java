@@ -9,5 +9,8 @@ import com.demkom58.springram.controller.message.MessageType;
  * @author Max Demydenko
  * @since 0.1
  */
-public record HandlerMapping(MessageType[] messageTypes, String value) {
+public record HandlerMapping(MessageType[] messageTypes, String chain, String value) {
+    public HandlerMapping(MessageType[] messageTypes, String value) {
+        this(messageTypes, "default", value);
+    }
 }
