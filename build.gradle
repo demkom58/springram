@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'com.demkom58'
-version '0.2-SNAPSHOT'
+version '0.3-SNAPSHOT'
 
 bootJar.enabled = false
 jar.enabled = true
@@ -39,11 +39,17 @@ test {
 }
 
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = "sources"
+}
 
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
+
+            artifact sourceJar
         }
     }
 
@@ -58,4 +64,3 @@ publishing {
         }
     }
 }
-

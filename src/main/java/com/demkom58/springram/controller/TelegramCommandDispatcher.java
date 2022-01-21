@@ -1,10 +1,13 @@
 package com.demkom58.springram.controller;
 
+import com.demkom58.springram.controller.container.CommandContainer;
 import com.demkom58.springram.controller.message.MessageType;
 import com.demkom58.springram.controller.message.TelegramMessage;
 import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandlerComposite;
+import com.demkom58.springram.controller.user.SpringramUserDetails;
+import com.demkom58.springram.controller.user.SpringramUserDetailsService;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -42,15 +45,22 @@ public class TelegramCommandDispatcher {
             return;
         }
 
-        TelegramMessageHandler handler = commandContainer.findHandler(eventType, commandText);
+        final SpringramUserDetails userDetails = commandContainer.getPathMatchingConfigurer()
+                .getUserDetailsService().loadById(message.getFromUser().getId());
+        final String userChain = userDetails == null ? null : userDetails.getChain();
+
+        TelegramMessageHandler handler = commandContainer.findHandler(eventType, userChain, commandText);
         if (handler == null) {
             return;
         }
 
-        final Map<String, String> variables = commandContainer.getPathMatchingConfigurer().getPathMatcher()
-                .extractUriTemplateVariables(handler.getMapping().value(), commandText);
+        final String mapping = handler.getMapping().value();
+        if (!mapping.isEmpty()) {
+            final Map<String, String> variables = commandContainer.getPathMatchingConfigurer().getPathMatcher()
+                    .extractUriTemplateVariables(mapping, commandText);
+            message.setAttribute("variables", variables);
+        }
 
-        message.setAttribute("variables", variables);
         final Object result = handler.invoke(argumentResolvers, message, bot, message, bot);
         if (result == null) {
             return;
@@ -85,7 +95,7 @@ public class TelegramCommandDispatcher {
                 return null;
             }
 
-            return commandParts[0] + " " + (line.length == 2 ? line[1] : "");
+            return line.length == 2 ? commandParts[0] + " " + line[1] : commandParts[0];
         } else {
             return message;
         }

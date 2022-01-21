@@ -37,7 +37,7 @@ Then add dependency
     <dependency>
         <groupId>com.github.demkom58</groupId>
         <artifactId>springram</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.3-SNAPSHOT</version>
     </dependency>
 ```
 
@@ -53,6 +53,6 @@ Add jitpack repository to your `build.gradle`, like this:
 Then add dependency
 ```groovy
     dependencies {
-        implementation 'com.github.demkom58:springram:0.2-SNAPSHOT'
+        implementation 'com.github.demkom58:springram:0.3-SNAPSHOT'
     }
 ```
