@@ -47,7 +47,7 @@ public class TelegramCommandDispatcher {
 
         final SpringramUserDetails userDetails = commandContainer.getPathMatchingConfigurer()
                 .getUserDetailsService().loadById(message.getFromUser().getId());
-        final String userChain = userDetails == null ? "default" : userDetails.getChain();
+        final String userChain = userDetails == null ? null : userDetails.getChain();
 
         TelegramMessageHandler handler = commandContainer.findHandler(eventType, userChain, commandText);
         if (handler == null) {
