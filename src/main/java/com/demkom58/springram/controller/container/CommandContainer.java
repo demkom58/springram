@@ -5,7 +5,6 @@ import com.demkom58.springram.controller.annotation.Chain;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.message.MessageType;
-import com.demkom58.springram.controller.message.TelegramMessage;
 import com.demkom58.springram.controller.method.HandlerMapping;
 import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.TelegramMessageHandlerMethod;
@@ -63,14 +62,22 @@ public class CommandContainer {
         final CommandMapping methodMapping = AnnotationUtils.findAnnotation(method, CommandMapping.class);
         assert methodMapping != null;
 
-        final Chain methodChain = AnnotationUtils.findAnnotation(method, Chain.class);
+        final String[] chains = readChains(beanClass, method);
+        final Set<String> paths = readPaths(beanClass, typeMapping, methodMapping);
+        final MessageType[] events = readMessageTypes(typeMapping, methodMapping);
 
-        String[] chains = methodChain == null || ObjectUtils.isEmpty(methodChain.chain())
-                ? new String[]{"default"}
-                : methodChain.chain();
+        for (String chain : chains) {
+            for (String path : paths) {
+                final var handlerMapping = new HandlerMapping(events, chain, path);
+                final var handlerMethod = new TelegramMessageHandlerMethod(handlerMapping, bean, method);
+                addHandlerMethod(chain, path, handlerMethod);
+            }
+        }
+    }
 
+    private Set<String> readPaths(Class<?> beanClass,
+                                  CommandMapping typeMapping, CommandMapping methodMapping) {
         final Set<String> paths = new HashSet<>();
-
         final String[] mappingValues
                 = ObjectUtils.isEmpty(methodMapping.value()) ? new String[]{""} : methodMapping.value();
 
@@ -104,24 +111,42 @@ public class CommandContainer {
             paths.add("");
         }
 
+        return paths;
+    }
+
+    private MessageType[] readMessageTypes(CommandMapping typeMapping, CommandMapping methodMapping) {
         MessageType[] events = methodMapping.event();
+
         if (ObjectUtils.isEmpty(events) && typeMapping != null) {
             events = typeMapping.event();
         }
+
         if (ObjectUtils.isEmpty(events)) {
             events = TEXT_MESSAGE_EVENTS;
         }
 
-        for (String chain : chains) {
-            for (String path : paths) {
-                final var handlerMapping = new HandlerMapping(events, chain, path);
-                final var handlerMethod = new TelegramMessageHandlerMethod(handlerMapping, bean, method);
-                addHandlerMethod(chain, path, handlerMethod);
-            }
-        }
+        return events;
     }
 
-    private void addHandlerMethod(String chain, String path,
+    private String[] readChains(Class<?> beanClass, Method method) {
+        final Chain classChainAnnotation = AnnotationUtils.findAnnotation(beanClass, Chain.class);
+        final Chain methodChainAnnotation = AnnotationUtils.findAnnotation(method, Chain.class);
+
+        String[] chains = {};
+        if (methodChainAnnotation != null && !ObjectUtils.isEmpty(methodChainAnnotation.chain())) {
+            chains = methodChainAnnotation.chain();
+        } else if (classChainAnnotation != null && !ObjectUtils.isEmpty(classChainAnnotation.chain())) {
+            chains = classChainAnnotation.chain();
+        }
+
+        if (chains.length == 0) {
+            chains = new String[]{null};
+        }
+
+        return chains;
+    }
+
+    private void addHandlerMethod(@Nullable String chain, String path,
                                   TelegramMessageHandlerMethod handlerMethod) throws IllegalStateException {
         final MessageType[] types = handlerMethod.getMapping().messageTypes();
         for (MessageType type : types) {

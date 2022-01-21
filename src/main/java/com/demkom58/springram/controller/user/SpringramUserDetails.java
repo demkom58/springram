@@ -1,5 +1,7 @@
 package com.demkom58.springram.controller.user;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Immutable representation of springram user,
  * for working with user related data in customizable
@@ -12,7 +14,8 @@ public interface SpringramUserDetails {
     /**
      * Returns user chain retrieved on creation.
      *
-     * @return non null, by default is "default" value
+     * @return identifier of chain, default chain is null
      */
+    @Nullable
     String getChain();
 }

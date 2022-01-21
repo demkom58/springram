@@ -32,7 +32,7 @@ class ChainMap {
      * @param handler method handler instance
      * @return true if registered, false in case when path already taken
      */
-    public boolean put(String chain, String path, TelegramMessageHandler handler) {
+    public boolean put(@Nullable String chain, String path, TelegramMessageHandler handler) {
         final PathMatcher pathMatcher = this.matchingConfigurer.getPathMatcher();
         final var registryMap = pathMatcher.isPattern(path) ? chainPatternMap : chainDirectMap;
         final var prev = registryMap
@@ -50,7 +50,7 @@ class ChainMap {
      * @return handler instance or null
      */
     @Nullable
-    public TelegramMessageHandler get(String chain, String command) {
+    public TelegramMessageHandler get(@Nullable String chain, String command) {
         final Map<String, TelegramMessageHandler> chainedDirect = chainDirectMap.get(chain);
 
         if (chainedDirect != null) {
