@@ -23,7 +23,8 @@ public @interface Chain {
 
     /**
      * Specifies names of chains via annotated
-     * method will be accessible
+     * method will be accessible, default chain
+     * is null.
      */
     @AliasFor("value")
     String[] chain() default {};
