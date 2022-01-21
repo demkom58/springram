@@ -64,6 +64,7 @@ class TelegramCommandDispatcherTests {
         verify(handlers).handle(any(), any(), same(bot), any());
         verify(resolvers).resolve(any(), any(), same(bot));
         verify(container).findHandler(any(), any(), any());
+        verify(bot).execute(any(SendMessage.class));
     }
 
 }
