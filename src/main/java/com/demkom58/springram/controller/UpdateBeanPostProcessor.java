@@ -10,7 +10,7 @@ import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentRe
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandler;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandlerComposite;
-import com.demkom58.springram.controller.method.result.impl.SendMessageHandlerMethodReturnValueHandler;
+import com.demkom58.springram.controller.method.result.impl.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
@@ -58,7 +58,22 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
 
     private List<HandlerMethodReturnValueHandler> createReturnValueHandlers() {
         return List.of(
-                new SendMessageHandlerMethodReturnValueHandler()
+                new SendMessageHandlerMethodReturnValueHandler(),
+                new AddStickerToSetHandlerMethodReturnValueHandler(),
+                new CreateNewStickerSetHandlerMethodReturnValueHandler(),
+                new EditMessageMediaHandlerMethodReturnValueHandler(),
+                new SendAnimationHandlerMethodReturnValueHandler(),
+                new SendAudioHandlerMethodReturnValueHandler(),
+                new SendDocumentHandlerMethodReturnValueHandler(),
+                new SendMediaGroupHandlerMethodReturnValueHandler(),
+                new SendPhotoHandlerMethodReturnValueHandler(),
+                new SendStickerHandlerMethodReturnValueHandler(),
+                new SendVideoHandlerMethodReturnValueHandler(),
+                new SendVideoNoteHandlerMethodReturnValueHandler(),
+                new SendVoiceHandlerMethodReturnValueHandler(),
+                new SetChatPhotoHandlerMethodReturnValueHandler(),
+                new SetStickerSetThumbHandlerMethodReturnValueHandler(),
+                new UploadStickerFileHandlerMethodReturnValueHandler()
         );
     }
 
