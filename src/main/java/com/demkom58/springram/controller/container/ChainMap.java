@@ -54,7 +54,7 @@ class ChainMap {
         final Map<String, TelegramMessageHandler> chainedDirect = chainDirectMap.get(chain);
 
         if (chainedDirect != null) {
-            final var directHandler = chainedDirect.get(command.toLowerCase());
+            final var directHandler = chainedDirect.get(command != null ? command.toLowerCase() : null);
             if (directHandler != null) {
                 return directHandler;
             }

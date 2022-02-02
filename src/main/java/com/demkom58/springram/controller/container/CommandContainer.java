@@ -39,7 +39,7 @@ public class CommandContainer {
 
     public CommandContainer() {
         final Map<MessageType, ChainMap> map = new HashMap<>();
-        for (MessageType value : MessageType.pathMethods()) {
+        for (MessageType value : MessageType.values()) {
             map.put(value, new ChainMap(pathMatchingConfigurer));
         }
 
@@ -150,10 +150,6 @@ public class CommandContainer {
                                   TelegramMessageHandlerMethod handlerMethod) throws IllegalStateException {
         final MessageType[] types = handlerMethod.getMapping().messageTypes();
         for (MessageType type : types) {
-            if (!type.canHasPath()) {
-                continue;
-            }
-
             log.trace("Adding method handler for message type {} with path: {}", type, path);
             final boolean registered = typeHandlerMap.get(type).put(chain, path, handlerMethod);
             if (!registered) {

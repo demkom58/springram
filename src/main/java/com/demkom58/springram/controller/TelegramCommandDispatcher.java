@@ -7,7 +7,6 @@ import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandlerComposite;
 import com.demkom58.springram.controller.user.SpringramUserDetails;
-import com.demkom58.springram.controller.user.SpringramUserDetailsService;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -39,11 +38,8 @@ public class TelegramCommandDispatcher {
         }
 
         final MessageType eventType = message.getEventType();
-        final String messageText = message.getText();
+        final String messageText = eventType.canHasPath() ? message.getText() : null;
         final String commandText = toCommand(bot, messageText);
-        if (commandText == null) {
-            return;
-        }
 
         final SpringramUserDetails userDetails = commandContainer.getPathMatchingConfigurer()
                 .getUserDetailsService().loadById(message.getFromUser().getId());
@@ -55,7 +51,7 @@ public class TelegramCommandDispatcher {
         }
 
         final String mapping = handler.getMapping().value();
-        if (!mapping.isEmpty()) {
+        if (commandText != null && !mapping.isEmpty()) {
             final Map<String, String> variables = commandContainer.getPathMatchingConfigurer().getPathMatcher()
                     .extractUriTemplateVariables(mapping, commandText);
             message.setAttribute("variables", variables);
@@ -77,7 +73,7 @@ public class TelegramCommandDispatcher {
     }
 
     @Nullable
-    private String toCommand(AbsSender bot, String message) throws TelegramApiException {
+    private String toCommand(AbsSender bot, @Nullable String message) throws TelegramApiException {
         if (!StringUtils.hasText(message)) {
             return null;
         }
