@@ -58,7 +58,7 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
 
     private List<HandlerMethodReturnValueHandler> createReturnValueHandlers() {
         return List.of(
-                new SendMessageHandlerMethodReturnValueHandler(),
+                new BotApiMethodHandlerMethodReturnValueHandler(),
                 new AddStickerToSetHandlerMethodReturnValueHandler(),
                 new CreateNewStickerSetHandlerMethodReturnValueHandler(),
                 new EditMessageMediaHandlerMethodReturnValueHandler(),
@@ -67,6 +67,7 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
                 new SendDocumentHandlerMethodReturnValueHandler(),
                 new SendMediaGroupHandlerMethodReturnValueHandler(),
                 new SendPhotoHandlerMethodReturnValueHandler(),
+                new SendPollHandlerMethodReturnValueHandler(),
                 new SendStickerHandlerMethodReturnValueHandler(),
                 new SendVideoHandlerMethodReturnValueHandler(),
                 new SendVideoNoteHandlerMethodReturnValueHandler(),
