@@ -1,7 +1,7 @@
 package com.demkom58.springram.controller.method.argument.impl;
 
 import com.demkom58.springram.controller.annotation.PathVariable;
-import com.demkom58.springram.controller.message.TelegramMessage;
+import com.demkom58.springram.controller.message.SpringramMessage;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -18,7 +18,7 @@ public class PathVariablesHandlerMethodArgumentResolver implements HandlerMethod
 
     @Override
     @Nullable
-    public Object resolve(MethodParameter parameter, TelegramMessage message, AbsSender bot) {
+    public Object resolve(MethodParameter parameter, SpringramMessage message, AbsSender bot) {
         final Object variablesObject = message.getAttribute("variables");
 
         final PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);

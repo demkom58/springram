@@ -1,6 +1,6 @@
 package com.demkom58.springram.controller.method.result.impl;
 
-import com.demkom58.springram.controller.message.TelegramMessage;
+import com.demkom58.springram.controller.message.SpringramMessage;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandler;
 import org.springframework.core.MethodParameter;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideoNote;
@@ -13,9 +13,8 @@ public class SendVideoNoteHandlerMethodReturnValueHandler implements HandlerMeth
     }
 
     @Override
-    public void handle(MethodParameter returnType, TelegramMessage message, AbsSender bot, Object result)
+    public void handle(MethodParameter returnType, SpringramMessage message, AbsSender bot, Object result)
             throws Exception {
-        final SendVideoNote sm = (SendVideoNote) result;
-        bot.execute(sm);
+        bot.execute((SendVideoNote) result);
     }
 }

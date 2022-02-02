@@ -3,18 +3,18 @@ package com.demkom58.springram.controller.method.result.impl;
 import com.demkom58.springram.controller.message.SpringramMessage;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandler;
 import org.springframework.core.MethodParameter;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
+import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
-public class SendVideoHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
+public class SendPollHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
     @Override
     public boolean isSupported(MethodParameter returnType) {
-        return SendVideo.class.isAssignableFrom(returnType.getParameterType());
+        return SendPoll.class.isAssignableFrom(returnType.getParameterType());
     }
 
     @Override
     public void handle(MethodParameter returnType, SpringramMessage message, AbsSender bot, Object result)
             throws Exception {
-        bot.execute((SendVideo) result);
+        bot.execute((SendPoll) result);
     }
 }

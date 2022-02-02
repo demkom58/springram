@@ -2,7 +2,7 @@ package com.demkom58.springram.controller.method.argument;
 
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
-import com.demkom58.springram.controller.message.TelegramMessage;
+import com.demkom58.springram.controller.message.SpringramMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,7 +21,8 @@ class HandlerMethodArgumentResolverCompositeTests {
     final Method handlerMethod = TestController.class.getDeclaredMethod("test", String.class);
     final MethodParameter parameter = new MethodParameter(handlerMethod, 0);
 
-    HandlerMethodArgumentResolverCompositeTests() throws NoSuchMethodException {}
+    HandlerMethodArgumentResolverCompositeTests() throws NoSuchMethodException {
+    }
 
     @Test
     void isSupported_valid_success() {
@@ -44,7 +45,7 @@ class HandlerMethodArgumentResolverCompositeTests {
     void resolve() throws Exception {
         final var resolvers = new HandlerMethodArgumentResolverComposite();
 
-        final TelegramMessage message = mock(TelegramMessage.class);
+        final SpringramMessage message = mock(SpringramMessage.class);
         final AbsSender bot = mock(AbsSender.class);
 
         final var mockedRes = mock(HandlerMethodArgumentResolver.class);
