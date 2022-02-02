@@ -1,7 +1,7 @@
 package com.demkom58.springram.controller.method.result;
 
 import com.demkom58.springram.controller.config.SpringramConfigurer;
-import com.demkom58.springram.controller.message.TelegramMessage;
+import com.demkom58.springram.controller.message.SpringramMessage;
 import org.springframework.core.MethodParameter;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
@@ -19,5 +19,5 @@ import java.util.List;
 public interface HandlerMethodReturnValueHandler {
     boolean isSupported(MethodParameter returnType);
 
-    void handle(MethodParameter returnType, TelegramMessage message, AbsSender bot, Object result) throws Exception;
+    void handle(MethodParameter returnType, SpringramMessage message, AbsSender bot, Object result) throws Exception;
 }

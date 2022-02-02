@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'com.demkom58'
-version '0.3-SNAPSHOT'
+version '0.4-SNAPSHOT'
 
 bootJar.enabled = false
 jar.enabled = true
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'org.telegram', name: 'telegrambots', version: '5.5.0'
+    implementation group: 'org.telegram', name: 'telegrambots', version: '5.6.0'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'

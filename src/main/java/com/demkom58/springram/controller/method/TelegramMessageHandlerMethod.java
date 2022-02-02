@@ -1,7 +1,7 @@
 package com.demkom58.springram.controller.method;
 
+import com.demkom58.springram.controller.message.SpringramMessage;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
-import com.demkom58.springram.controller.message.TelegramMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.BridgeMethodResolver;
@@ -46,7 +46,7 @@ public class TelegramMessageHandlerMethod implements TelegramMessageHandler {
 
     @Nullable
     public Object invoke(HandlerMethodArgumentResolverComposite resolvers,
-                         TelegramMessage message,
+                         SpringramMessage message,
                          AbsSender bot,
                          Object... providedArgs) throws Exception {
         Object[] args = getMethodArgumentValues(resolvers, message, bot, providedArgs);
@@ -58,7 +58,7 @@ public class TelegramMessageHandlerMethod implements TelegramMessageHandler {
     }
 
     protected Object[] getMethodArgumentValues(HandlerMethodArgumentResolverComposite resolvers,
-                                               TelegramMessage message,
+                                               SpringramMessage message,
                                                AbsSender bot,
                                                Object... providedArgs) throws Exception {
         if (ObjectUtils.isEmpty(parameters)) {

@@ -2,12 +2,13 @@ package com.demkom58.springram.controller;
 
 import com.demkom58.springram.controller.container.CommandContainer;
 import com.demkom58.springram.controller.message.MessageType;
-import com.demkom58.springram.controller.message.TelegramMessage;
+import com.demkom58.springram.controller.message.SpringramMessage;
+import com.demkom58.springram.controller.message.SpringramMessageFactory;
+import com.demkom58.springram.controller.message.TextMessage;
 import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandlerComposite;
 import com.demkom58.springram.controller.user.SpringramUserDetails;
-import com.demkom58.springram.controller.user.SpringramUserDetailsService;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -24,26 +25,25 @@ public class TelegramCommandDispatcher {
     private HandlerMethodReturnValueHandlerComposite returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
     private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
     private final CommandContainer commandContainer;
+    private final SpringramMessageFactory messageFactory;
 
-    public TelegramCommandDispatcher(CommandContainer commandContainer) {
+    public TelegramCommandDispatcher(CommandContainer commandContainer, SpringramMessageFactory messageFactory) {
         this.commandContainer = commandContainer;
+        this.messageFactory = messageFactory;
     }
 
     public void dispatch(Update update, AbsSender bot) throws Exception {
         Objects.requireNonNull(update, "Update can't be null!");
         Objects.requireNonNull(bot, "Receiver bot can't be null!");
 
-        final TelegramMessage message = TelegramMessage.from(update);
+        final SpringramMessage message = messageFactory.create(update);
         if (message == null) {
             return;
         }
 
         final MessageType eventType = message.getEventType();
-        final String messageText = message.getText();
+        final String messageText = eventType.canHasPath() ? ((TextMessage) message).getText() : null;
         final String commandText = toCommand(bot, messageText);
-        if (commandText == null) {
-            return;
-        }
 
         final SpringramUserDetails userDetails = commandContainer.getPathMatchingConfigurer()
                 .getUserDetailsService().loadById(message.getFromUser().getId());
@@ -55,7 +55,7 @@ public class TelegramCommandDispatcher {
         }
 
         final String mapping = handler.getMapping().value();
-        if (!mapping.isEmpty()) {
+        if (commandText != null && !mapping.isEmpty()) {
             final Map<String, String> variables = commandContainer.getPathMatchingConfigurer().getPathMatcher()
                     .extractUriTemplateVariables(mapping, commandText);
             message.setAttribute("variables", variables);
@@ -77,7 +77,7 @@ public class TelegramCommandDispatcher {
     }
 
     @Nullable
-    private String toCommand(AbsSender bot, String message) throws TelegramApiException {
+    private String toCommand(AbsSender bot, @Nullable String message) throws TelegramApiException {
         if (!StringUtils.hasText(message)) {
             return null;
         }

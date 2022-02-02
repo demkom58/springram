@@ -2,7 +2,7 @@ package com.demkom58.springram.controller.method.result;
 
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
-import com.demkom58.springram.controller.message.TelegramMessage;
+import com.demkom58.springram.controller.message.SpringramMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,7 +45,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
     void handle_valid_success() throws Exception {
         final var handlers = new HandlerMethodReturnValueHandlerComposite();
 
-        final TelegramMessage message = mock(TelegramMessage.class);
+        final SpringramMessage message = mock(SpringramMessage.class);
         final SendMessage result = mock(SendMessage.class);
         final AbsSender bot = mock(AbsSender.class);
 
