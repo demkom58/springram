@@ -172,10 +172,6 @@ public class CommandContainer {
         return typeHandlerMap.get(method).get(chain, command);
     }
 
-    private PathMatcher getPathMatcher() {
-        return pathMatchingConfigurer.getPathMatcher();
-    }
-
     public PathMatchingConfigurer getPathMatchingConfigurer() {
         return pathMatchingConfigurer;
     }
