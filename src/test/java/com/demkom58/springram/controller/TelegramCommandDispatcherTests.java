@@ -4,10 +4,11 @@ import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
 import com.demkom58.springram.controller.container.CommandContainer;
+import com.demkom58.springram.controller.message.SpringramMessageFactory;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandlerComposite;
-import com.demkom58.springram.controller.method.result.impl.SendMessageHandlerMethodReturnValueHandler;
+import com.demkom58.springram.controller.method.result.impl.BotApiMethodHandlerMethodReturnValueHandler;
 import com.demkom58.springram.util.TestingUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,13 +45,13 @@ class TelegramCommandDispatcherTests {
         container = spy(new CommandContainer());
         container.addMethod(new TestController(), TestController.class.getDeclaredMethod("test", String.class));
 
-        dispatcher = new TelegramCommandDispatcher(container);
+        dispatcher = new TelegramCommandDispatcher(container, new SpringramMessageFactory());
 
         resolvers = spy(new HandlerMethodArgumentResolverComposite());
         resolvers.add(new PathVariablesHandlerMethodArgumentResolver());
 
         handlers = spy(new HandlerMethodReturnValueHandlerComposite());
-        handlers.add(new SendMessageHandlerMethodReturnValueHandler());
+        handlers.add(new BotApiMethodHandlerMethodReturnValueHandler());
 
         dispatcher.setArgumentResolvers(resolvers);
         dispatcher.setReturnValueHandlers(handlers);

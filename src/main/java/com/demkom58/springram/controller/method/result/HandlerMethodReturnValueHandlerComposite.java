@@ -1,10 +1,8 @@
 package com.demkom58.springram.controller.method.result;
 
-import com.demkom58.springram.controller.message.TelegramMessage;
-import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolver;
+import com.demkom58.springram.controller.message.SpringramMessage;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
 import java.util.*;
@@ -38,7 +36,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
     }
 
     @Override
-    public void handle(MethodParameter returnType, TelegramMessage message, AbsSender bot, Object result) throws Exception {
+    public void handle(MethodParameter returnType, SpringramMessage message, AbsSender bot, Object result) throws Exception {
         final HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
         Objects.requireNonNull(handler, "Return value handler not found! It should be checked with isSupported() first.");
         handler.handle(returnType, message, bot, result);
