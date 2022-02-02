@@ -1,6 +1,6 @@
 package com.demkom58.springram.controller.method.result.impl;
 
-import com.demkom58.springram.controller.message.TelegramMessage;
+import com.demkom58.springram.controller.message.SpringramMessage;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandler;
 import org.springframework.core.MethodParameter;
 import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
@@ -13,8 +13,8 @@ public class SendPollHandlerMethodReturnValueHandler implements HandlerMethodRet
     }
 
     @Override
-    public void handle(MethodParameter returnType, TelegramMessage message, AbsSender bot, Object result) throws Exception {
-        final SendPoll sp = (SendPoll) result;
-        bot.execute(sp);
+    public void handle(MethodParameter returnType, SpringramMessage message, AbsSender bot, Object result)
+            throws Exception {
+        bot.execute((SendPoll) result);
     }
 }

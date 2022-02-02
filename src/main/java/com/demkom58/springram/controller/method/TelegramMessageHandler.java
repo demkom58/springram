@@ -1,7 +1,7 @@
 package com.demkom58.springram.controller.method;
 
+import com.demkom58.springram.controller.message.SpringramMessage;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
-import com.demkom58.springram.controller.message.TelegramMessage;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.telegram.telegrambots.meta.bots.AbsSender;
@@ -16,7 +16,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 public interface TelegramMessageHandler {
     @Nullable
     Object invoke(HandlerMethodArgumentResolverComposite resolvers,
-                  TelegramMessage message,
+                  SpringramMessage message,
                   AbsSender bot,
                   Object... providedArgs) throws Exception;
 
