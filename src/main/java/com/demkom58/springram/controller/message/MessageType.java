@@ -12,30 +12,48 @@ import java.util.Arrays;
 public enum MessageType {
     /**
      * When chat text message received.
+     *
+     * Associated with {@link ChatTextMessage ChatTextMessage}.
      */
     TEXT_MESSAGE(true),
     /**
      * On chat text message edited.
+     *
+     * Associated with {@link ChatTextMessage ChatTextMessage}.
      */
     TEXT_MESSAGE_EDIT(true),
     /**
      * When received post in channel.
+     *
+     * Associated with {@link ChatTextMessage ChatTextMessage}.
      */
     TEXT_POST(true),
     /**
      * On channel post edited.
+     *
+     * Associated with {@link ChatTextMessage ChatTextMessage}.
      */
     TEXT_POST_EDIT(true),
     /**
      * A user status was updated in a chat.
      *
+     * Associated with {@link ChatMessage ChatMessage}.
+     *
      * @spec bot must be an administrator in the chat and must have
      * value "chat_member" in the list of allowed_updates to receive
      * these messages
      */
-    CHAT_MEMBER_STATUS_UPDATE(false), CHAT_JOIN_REQUEST(false),
+    CHAT_MEMBER_STATUS_UPDATE(false),
+    /**
+     * On new chat join request.
+     *
+     * Associated with {@link ChatMessage ChatMessage}.
+     */
+    CHAT_JOIN_REQUEST(false),
     /**
      * The user status was updated in a private chat.
+     *
+     * Associated with {@link ChatMessage ChatMessage}.
      *
      * @spec received when the bot is blocked or unblocked by the user
      */
@@ -43,11 +61,15 @@ public enum MessageType {
     /**
      * Happens when message with poll received.
      *
+     * Associated with {@link ChatMessage ChatMessage}.
+     *
      * @spec bot receive polls, which are sent by the bot only
      */
     POLL_MESSAGE(false),
     /**
      * A user changed their answer in a non-anonymous poll.
+     *
+     * Associated with {@link SpringramMessage SpringramMessage}.
      *
      * @spec bot can receive new votes only in polls that were
      * sent by the bot itself
@@ -55,22 +77,32 @@ public enum MessageType {
     POLL_ANSWER(false),
     /**
      * On callback query received.
+     *
+     * Associated with {@link ChatMessage ChatMessage}.
      */
     CALLBACK_QUERY(false),
     /**
      * Result of choosing inline query by user.
+     *
+     * Associated with {@link SpringramMessage SpringramMessage}.
      */
     INLINE_QUERY_CHOSEN(false),
     /**
      * When inline query received.
+     *
+     * Associated with {@link SpringramMessage SpringramMessage}.
      */
     INLINE_QUERY(false),
     /**
      * On new pre-checkout query.
+     *
+     * Associated with {@link SpringramMessage SpringramMessage}.
      */
     PRE_CHECKOUT_QUERY(false),
     /**
      * On new shipping query.
+     *
+     * Associated with {@link SpringramMessage SpringramMessage}.
      *
      * @spec only for invoices with flexible price
      */
