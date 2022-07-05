@@ -8,6 +8,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableAspectJAutoProxy
-@Import({SpringramSecurityAutoConfiguration.class, SpringramGrantedAuthoritiesProvider.class})
+@Import({BasicSpringramGrantedAuthoritiesProvider.class, SpringramMethodSecurityAspect.class})
 public class SpringramSecurityAutoConfiguration {
 }
