@@ -8,7 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.User;
 public final class TestingUtil {
     public static Update createTextMessage(String messageText) {
         var user = new User(10L, "name", true, "last", "username",
-                "en", true, true, true);
+                "en", true, true, true,
+                true, true);
 
         var message = new Message();
         message.setText(messageText);
