@@ -27,3 +27,5 @@ jobs:
         distribution: 'adopt'
     - name: Build springram-core
       run: ./gradlew springram-core:build
+    - name: Build springram-security
+      run: ./gradlew springram-security:build
