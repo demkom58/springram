@@ -40,6 +40,8 @@ allprojects {
         archiveClassifier = "sources"
     }
 
+    task install(dependsOn: 'publishToMavenLocal')
+
     publishing {
         publications {
             maven(MavenPublication) {
