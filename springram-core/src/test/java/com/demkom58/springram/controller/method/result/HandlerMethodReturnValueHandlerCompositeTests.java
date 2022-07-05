@@ -1,4 +1,4 @@
-package com.demkom58.springram.controller.method.argument;
+package com.demkom58.springram.controller.method.result;
 
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
@@ -12,50 +12,49 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
-class HandlerMethodArgumentResolverCompositeTests {
+public class HandlerMethodReturnValueHandlerCompositeTests {
     final Method handlerMethod = TestController.class.getDeclaredMethod("test", String.class);
     final MethodParameter parameter = new MethodParameter(handlerMethod, 0);
 
-    HandlerMethodArgumentResolverCompositeTests() throws NoSuchMethodException {
+    HandlerMethodReturnValueHandlerCompositeTests() throws NoSuchMethodException {
     }
 
     @Test
     void isSupported_valid_success() {
-        final var resolvers = new HandlerMethodArgumentResolverComposite();
+        final var handlers = new HandlerMethodReturnValueHandlerComposite();
 
         // check for emptiness of new composite
-        assertFalse(resolvers.isSupported(parameter));
+        assertFalse(handlers.isSupported(parameter));
 
         // check for existence via isSupported
-        final var mockedRes = mock(HandlerMethodArgumentResolver.class);
+        final var mockedRes = mock(HandlerMethodReturnValueHandler.class);
         doReturn(true).when(mockedRes).isSupported(parameter);
 
-        resolvers.add(mockedRes);
+        handlers.add(mockedRes);
 
-        assertTrue(resolvers.isSupported(parameter));
+        assertTrue(handlers.isSupported(parameter));
         verify(mockedRes).isSupported(parameter);
     }
 
     @Test
-    void resolve() throws Exception {
-        final var resolvers = new HandlerMethodArgumentResolverComposite();
+    void handle_valid_success() throws Exception {
+        final var handlers = new HandlerMethodReturnValueHandlerComposite();
 
         final SpringramMessage message = mock(SpringramMessage.class);
+        final SendMessage result = mock(SendMessage.class);
         final AbsSender bot = mock(AbsSender.class);
 
-        final var mockedRes = mock(HandlerMethodArgumentResolver.class);
+        final var mockedHandler = mock(HandlerMethodReturnValueHandler.class);
+        doReturn(true).when(mockedHandler).isSupported(parameter);
 
-        doReturn(true).when(mockedRes).isSupported(parameter);
-        doReturn(new SendMessage()).when(mockedRes).resolve(parameter, message, bot);
+        handlers.add(mockedHandler);
+        handlers.handle(parameter, message, bot, result);
 
-        resolvers.add(mockedRes);
-        resolvers.resolve(parameter, message, bot);
-        verify(mockedRes).resolve(parameter, message, bot);
+        verify(mockedHandler).handle(parameter, message, bot, result);
     }
 
     static class TestController {
