@@ -50,16 +50,25 @@ class ChainMap {
      * @return handler instance or null
      */
     @Nullable
-    public TelegramMessageHandler get(@Nullable String chain, String command) {
+    public TelegramMessageHandler get(@Nullable String chain, @Nullable String command) {
         final Map<String, TelegramMessageHandler> chainedDirect = chainDirectMap.get(chain);
+        if (command == null) {
+            command = "";
+        }
 
+        // handle not pattern command
         if (chainedDirect != null) {
-            final var directHandler = chainedDirect.get(command != null ? command.toLowerCase() : null);
+            final var directHandler = chainedDirect.get(command.toLowerCase());
             if (directHandler != null) {
                 return directHandler;
             }
+
+            if (command.isEmpty()) {
+                return null;
+            }
         }
 
+        // handle pattern command
         final PathMatcher pathMatcher = this.matchingConfigurer.getPathMatcher();
         final List<TelegramMessageHandler> handlers = new ArrayList<>();
         final Map<String, TelegramMessageHandler> chainedPattern = chainPatternMap.get(chain);
@@ -73,10 +82,12 @@ class ChainMap {
             }
         }
 
+        // return default handler if not found
         if (handlers.isEmpty()) {
             return chainedDirect == null ? null : chainedDirect.get("");
         }
 
+        // find handler with most specific path
         final Comparator<String> patternComparator = pathMatcher.getPatternComparator(command);
         handlers.sort((c1, c2) -> patternComparator.compare(
                 c1.getMapping().value(),
