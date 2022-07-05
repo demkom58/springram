@@ -168,7 +168,7 @@ public class CommandContainer {
      * @return method handler, that can be null
      */
     @Nullable
-    public TelegramMessageHandler findHandler(MessageType method, String chain, String command) {
+    public TelegramMessageHandler findHandler(MessageType method, @Nullable String chain, @Nullable String command) {
         return typeHandlerMap.get(method).get(chain, command);
     }
 
