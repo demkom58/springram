@@ -5,7 +5,7 @@ import com.demkom58.springram.controller.annotation.Chain;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.message.MessageType;
-import com.demkom58.springram.controller.method.ExceptionHandler;
+import com.demkom58.springram.controller.annotation.ExceptionHandler;
 import com.demkom58.springram.controller.method.HandlerMapping;
 import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.TelegramMessageHandlerMethod;
@@ -20,6 +20,13 @@ import org.springframework.util.PathMatcher;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * Container for searching exception handler methods
+ * and registering them.
+ *
+ * @author Max Demydenko
+ * @since 0.5
+ */
 @Component
 public class ExceptionHandlerContainer {
 
