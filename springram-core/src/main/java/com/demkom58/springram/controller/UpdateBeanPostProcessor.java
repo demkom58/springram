@@ -4,7 +4,9 @@ import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.config.SpringramConfigurerComposite;
-import com.demkom58.springram.controller.container.CommandContainer;
+import com.demkom58.springram.controller.container.CommandHandlerContainer;
+import com.demkom58.springram.controller.container.ExceptionHandlerContainer;
+import com.demkom58.springram.controller.method.ExceptionHandler;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolver;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
@@ -20,10 +22,12 @@ import java.util.*;
 
 public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
     private final Map<String, Class<?>> botControllerMap = new HashMap<>();
-    private final CommandContainer commandContainer;
+    private final CommandHandlerContainer commandContainer;
+    private final ExceptionHandlerContainer exceptionContainer;
 
     public UpdateBeanPostProcessor(TelegramCommandDispatcher commandDispatcher,
-                                   CommandContainer commandContainer,
+                                   CommandHandlerContainer commandContainer,
+                                   ExceptionHandlerContainer exceptionContainer,
                                    SpringramConfigurerComposite configurerComposite) {
         final HandlerMethodArgumentResolverComposite argumentResolvers
                 = new HandlerMethodArgumentResolverComposite();
@@ -45,9 +49,13 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
         commandDispatcher.setArgumentResolvers(argumentResolvers);
 
         this.commandContainer = commandContainer;
+        this.exceptionContainer = exceptionContainer;
+
         PathMatchingConfigurer pathMatchingConfigurer = new PathMatchingConfigurer();
         configurerComposite.configurePathMatcher(pathMatchingConfigurer);
+
         commandContainer.setPathMatchingConfigurer(pathMatchingConfigurer);
+        exceptionContainer.setPathMatchingConfigurer(pathMatchingConfigurer);
     }
 
     private List<HandlerMethodArgumentResolver> createArgumentResolvers() {
@@ -97,8 +105,13 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
         }
 
         Arrays.stream(original.getMethods())
-                .filter(method -> method.isAnnotationPresent(CommandMapping.class))
+                .filter(method -> method.isAnnotationPresent(CommandMapping.class)
+                        && !method.isAnnotationPresent(ExceptionHandler.class))
                 .forEach((Method method) -> commandContainer.addMethod(bean, method));
+
+        Arrays.stream(original.getMethods())
+                .filter(method -> method.isAnnotationPresent(ExceptionHandler.class))
+                .forEach(method -> exceptionContainer.addMethod(bean, method));
 
         return bean;
     }
