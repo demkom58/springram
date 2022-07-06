@@ -1,4 +1,4 @@
-package com.demkom58.springram.security;
+package com.demkom58.springram.controller;
 
 import com.demkom58.springram.controller.message.SpringramMessage;
 import org.springframework.lang.Nullable;
