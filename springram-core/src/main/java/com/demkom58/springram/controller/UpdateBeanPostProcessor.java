@@ -6,7 +6,7 @@ import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.config.SpringramConfigurerComposite;
 import com.demkom58.springram.controller.container.CommandHandlerContainer;
 import com.demkom58.springram.controller.container.ExceptionHandlerContainer;
-import com.demkom58.springram.controller.method.ExceptionHandler;
+import com.demkom58.springram.controller.annotation.ExceptionHandler;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolver;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
