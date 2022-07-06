@@ -3,7 +3,7 @@ package com.demkom58.springram.controller;
 import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
-import com.demkom58.springram.controller.container.CommandContainer;
+import com.demkom58.springram.controller.container.CommandHandlerContainer;
 import com.demkom58.springram.controller.container.PathAlreadyTakenException;
 import com.demkom58.springram.controller.message.MessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({MockitoExtension.class})
-class CommandContainerTests {
+class CommandHandlerContainerTests {
     private static Method testControllerMethod;
     private static Method patternControllerMethod;
 
@@ -30,7 +30,7 @@ class CommandContainerTests {
         }
     }
 
-    private CommandContainer container;
+    private CommandHandlerContainer container;
 
     @BotController
     static class TestController {
@@ -50,7 +50,7 @@ class CommandContainerTests {
 
     @BeforeEach
     void init() {
-        container = new CommandContainer();
+        container = new CommandHandlerContainer();
     }
 
     @Test

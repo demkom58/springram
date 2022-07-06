@@ -13,4 +13,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = 'springram'
-include('springram-core')
+include(
+        'springram-core',
+        'springram-security'
+)
