@@ -51,7 +51,7 @@ public class TelegramCommandDispatcher {
 
         final MessageType eventType = message.getEventType();
         final String messageText = eventType.canHasPath() ? ((TextMessage) message).getText() : null;
-        final String commandText = toCommand(bot, messageText);
+        final String commandText = shortCommand(bot, messageText);
 
         final SpringramUserDetails userDetails = commandContainer.getPathMatchingConfigurer()
                 .getUserDetailsService().loadById(message.getFromUser().getId());
@@ -70,8 +70,6 @@ public class TelegramCommandDispatcher {
         }
 
         Object result = invokeHandler(bot, message, handler);
-
-
         if (result == null) {
             return;
         }
@@ -120,7 +118,7 @@ public class TelegramCommandDispatcher {
 
 
     @Nullable
-    private String toCommand(AbsSender bot, @Nullable String message) throws TelegramApiException {
+    private String shortCommand(AbsSender bot, @Nullable String message) throws TelegramApiException {
         if (!StringUtils.hasText(message)) {
             return null;
         }
