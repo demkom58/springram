@@ -13,9 +13,8 @@
 <img align="right" src="https://i.ibb.co/mGrR6V5/logo.png" height="100" width="100" alt="Springram Logo">
 
 # Springram
-Springram is a library for working with telegram using the spring
-framework and spring boot. This library gives you the ability to
-use controllers like in spring web-mvc.
+Springram is a telegram framework based on the Spring framework and Spring Boot.
+It gives you the ability to use controllers like in spring web-mvc.
 
 
 This framework based on [rubenlagus' TelegramBots](https://github.com/rubenlagus/TelegramBots) 
@@ -23,7 +22,7 @@ that is Java implementation of Telegram API.
 
 ## How to use
 
-To understand how to work with this library, you can see the [wiki](https://github.com/demkom58/springram/wiki) section.
+To understand how to work with this framework, you can see the [wiki](https://github.com/demkom58/springram/wiki) section.
 
 ### Maven
 Add jitpack repository to your `pom.xml`, like this:
