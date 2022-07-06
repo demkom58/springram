@@ -1,10 +1,7 @@
 package com.demkom58.springram.controller;
 
 import com.demkom58.springram.controller.container.CommandContainer;
-import com.demkom58.springram.controller.message.MessageType;
-import com.demkom58.springram.controller.message.SpringramMessage;
-import com.demkom58.springram.controller.message.SpringramMessageFactory;
-import com.demkom58.springram.controller.message.TextMessage;
+import com.demkom58.springram.controller.message.*;
 import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.result.HandlerMethodReturnValueHandlerComposite;
@@ -13,10 +10,12 @@ import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,10 +25,14 @@ public class TelegramCommandDispatcher {
     private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
     private final CommandContainer commandContainer;
     private final SpringramMessageFactory messageFactory;
+    private final List<CommandPreHandler> preHandlers;
 
-    public TelegramCommandDispatcher(CommandContainer commandContainer, SpringramMessageFactory messageFactory) {
+    public TelegramCommandDispatcher(CommandContainer commandContainer,
+                                     SpringramMessageFactory messageFactory,
+                                     List<CommandPreHandler> preHandlers) {
         this.commandContainer = commandContainer;
         this.messageFactory = messageFactory;
+        this.preHandlers = preHandlers;
     }
 
     public void dispatch(Update update, AbsSender bot) throws Exception {
@@ -61,7 +64,7 @@ public class TelegramCommandDispatcher {
             message.setAttribute("variables", variables);
         }
 
-        final Object result = handler.invoke(argumentResolvers, message, bot, message, bot);
+        final Object result = invokeHandler(bot, message, handler);
         if (result == null) {
             return;
         }
@@ -75,6 +78,22 @@ public class TelegramCommandDispatcher {
                     returnType.getParameterType().getName() + "' in method '" + returnType.getMethod() + "'");
         }
     }
+
+    @Nullable
+    private Object invokeHandler(AbsSender bot, SpringramMessage message, TelegramMessageHandler handler) throws Exception {
+        Chat chat = null;
+        if (message instanceof ChatMessage cm) {
+            chat = cm.getChat();
+        }
+
+        final UserActionContext context = new UserActionContext(message.getFromUser(), chat, message, bot);
+        for (CommandPreHandler preHandler : preHandlers) {
+            preHandler.handle(context);
+        }
+
+        return handler.invoke(argumentResolvers, message, bot, message, bot);
+    }
+
 
     @Nullable
     private String toCommand(AbsSender bot, @Nullable String message) throws TelegramApiException {
