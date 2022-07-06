@@ -3,7 +3,8 @@ package com.demkom58.springram.controller;
 import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.CommandMapping;
 import com.demkom58.springram.controller.annotation.PathVariable;
-import com.demkom58.springram.controller.container.CommandContainer;
+import com.demkom58.springram.controller.container.CommandHandlerContainer;
+import com.demkom58.springram.controller.container.ExceptionHandlerContainer;
 import com.demkom58.springram.controller.message.SpringramMessageFactory;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
 import com.demkom58.springram.controller.method.argument.impl.PathVariablesHandlerMethodArgumentResolver;
@@ -19,13 +20,16 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
+import java.util.ArrayList;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TelegramCommandDispatcherTests {
-    private CommandContainer container;
+    private CommandHandlerContainer container;
+    private ExceptionHandlerContainer exContainer;
     private TelegramCommandDispatcher dispatcher;
     private HandlerMethodReturnValueHandlerComposite handlers;
     private HandlerMethodArgumentResolverComposite resolvers;
@@ -43,10 +47,11 @@ class TelegramCommandDispatcherTests {
     void init() throws Exception {
         update = spy(TestingUtil.createTextMessage("test test"));
 
-        container = spy(new CommandContainer());
+        container = spy(new CommandHandlerContainer());
         container.addMethod(new TestController(), TestController.class.getDeclaredMethod("test", String.class));
+        exContainer = spy(new ExceptionHandlerContainer());
 
-        dispatcher = new TelegramCommandDispatcher(container, new SpringramMessageFactory());
+        dispatcher = new TelegramCommandDispatcher(container, exContainer, new SpringramMessageFactory(), new ArrayList<>());
 
         resolvers = spy(new HandlerMethodArgumentResolverComposite());
         resolvers.add(new PathVariablesHandlerMethodArgumentResolver());

@@ -1,0 +1,5 @@
+dependencies {
+    api project(':springram-core')
+    api group: 'org.telegram', name: 'telegrambots', version: '6.1.0'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
+}

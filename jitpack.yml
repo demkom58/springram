@@ -5,3 +5,4 @@ before_install:
   - sdk use java 17.0.1-open
 install:
   - ./gradlew springram-core:clean springram-core:install
+  - ./gradlew springram-security:clean springram-security:install

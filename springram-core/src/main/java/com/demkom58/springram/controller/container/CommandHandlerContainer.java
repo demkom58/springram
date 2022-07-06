@@ -30,14 +30,14 @@ import java.util.Set;
  * @since 0.1
  */
 @Component
-public class CommandContainer {
-    private static final Logger log = LoggerFactory.getLogger(CommandContainer.class);
+public class CommandHandlerContainer {
+    private static final Logger log = LoggerFactory.getLogger(CommandHandlerContainer.class);
     private static final MessageType[] TEXT_MESSAGE_EVENTS = new MessageType[]{MessageType.TEXT_MESSAGE};
 
     private final Map<MessageType, ChainMap> typeHandlerMap;
     private PathMatchingConfigurer pathMatchingConfigurer = new PathMatchingConfigurer();
 
-    public CommandContainer() {
+    public CommandHandlerContainer() {
         final Map<MessageType, ChainMap> map = new HashMap<>();
         for (MessageType value : MessageType.values()) {
             map.put(value, new ChainMap(pathMatchingConfigurer));
@@ -76,7 +76,8 @@ public class CommandContainer {
     }
 
     private Set<String> readPaths(Class<?> beanClass,
-                                  CommandMapping typeMapping, CommandMapping methodMapping) {
+                                  @Nullable CommandMapping typeMapping,
+                                  CommandMapping methodMapping) {
         final Set<String> paths = new HashSet<>();
         final String[] mappingValues
                 = ObjectUtils.isEmpty(methodMapping.value()) ? new String[]{""} : methodMapping.value();
@@ -114,7 +115,8 @@ public class CommandContainer {
         return paths;
     }
 
-    private MessageType[] readMessageTypes(CommandMapping typeMapping, CommandMapping methodMapping) {
+    private MessageType[] readMessageTypes(@Nullable CommandMapping typeMapping,
+                                           CommandMapping methodMapping) {
         MessageType[] events = methodMapping.event();
 
         if (ObjectUtils.isEmpty(events) && typeMapping != null) {
