@@ -1,5 +1,6 @@
 dependencies {
     api group: 'org.telegram', name: 'telegrambots', version: '6.1.0'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+
+    annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 }
