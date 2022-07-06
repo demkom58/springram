@@ -1,6 +1,7 @@
 package com.demkom58.springram.controller;
 
-import com.demkom58.springram.controller.container.CommandContainer;
+import com.demkom58.springram.controller.container.CommandHandlerContainer;
+import com.demkom58.springram.controller.container.ExceptionHandlerContainer;
 import com.demkom58.springram.controller.message.*;
 import com.demkom58.springram.controller.method.TelegramMessageHandler;
 import com.demkom58.springram.controller.method.argument.HandlerMethodArgumentResolverComposite;
@@ -9,6 +10,7 @@ import com.demkom58.springram.controller.user.SpringramUserDetails;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -23,14 +25,17 @@ import java.util.Objects;
 public class TelegramCommandDispatcher {
     private HandlerMethodReturnValueHandlerComposite returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
     private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
-    private final CommandContainer commandContainer;
+    private final CommandHandlerContainer commandContainer;
+    private final ExceptionHandlerContainer exceptionContainer;
     private final SpringramMessageFactory messageFactory;
     private final List<CommandPreHandler> preHandlers;
 
-    public TelegramCommandDispatcher(CommandContainer commandContainer,
+    public TelegramCommandDispatcher(CommandHandlerContainer commandContainer,
+                                     ExceptionHandlerContainer exceptionContainer,
                                      SpringramMessageFactory messageFactory,
                                      List<CommandPreHandler> preHandlers) {
         this.commandContainer = commandContainer;
+        this.exceptionContainer = exceptionContainer;
         this.messageFactory = messageFactory;
         this.preHandlers = preHandlers;
     }
@@ -58,13 +63,15 @@ public class TelegramCommandDispatcher {
         }
 
         final String mapping = handler.getMapping().value();
-        if (commandText != null && !mapping.isEmpty()) {
+        if (commandText != null && !ObjectUtils.isEmpty(mapping)) {
             final Map<String, String> variables = commandContainer.getPathMatchingConfigurer().getPathMatcher()
                     .extractUriTemplateVariables(mapping, commandText);
             message.setAttribute("variables", variables);
         }
 
-        final Object result = invokeHandler(bot, message, handler);
+        Object result = invokeHandler(bot, message, handler);
+
+
         if (result == null) {
             return;
         }
@@ -91,7 +98,24 @@ public class TelegramCommandDispatcher {
             preHandler.handle(context);
         }
 
-        return handler.invoke(argumentResolvers, message, bot, message, bot);
+        Object result;
+
+        try {
+            result = handler.invoke(argumentResolvers, message, bot, message, bot);
+        } catch (Throwable throwable) {
+            TelegramMessageHandler exHandler = exceptionContainer.findHandler(throwable.getClass(),
+                    message.getEventType(),
+                    handler.getMapping().chain(),
+                    handler.getMapping().value()
+            );
+            if (exHandler != null) {
+                result = exHandler.invoke(argumentResolvers, message, bot, message, bot, throwable);
+            } else {
+                throw throwable;
+            }
+        }
+
+        return result;
     }
 
 
