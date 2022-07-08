@@ -55,7 +55,6 @@ public class UpdateBeanPostProcessor implements BeanPostProcessor, Ordered {
         configurerComposite.configurePathMatcher(pathMatchingConfigurer);
 
         commandContainer.setPathMatchingConfigurer(pathMatchingConfigurer);
-        exceptionContainer.setPathMatchingConfigurer(pathMatchingConfigurer);
     }
 
     private List<HandlerMethodArgumentResolver> createArgumentResolvers() {
