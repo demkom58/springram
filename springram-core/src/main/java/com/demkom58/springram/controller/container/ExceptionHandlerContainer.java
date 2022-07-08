@@ -3,7 +3,6 @@ package com.demkom58.springram.controller.container;
 import com.demkom58.springram.controller.annotation.BotController;
 import com.demkom58.springram.controller.annotation.Chain;
 import com.demkom58.springram.controller.annotation.CommandMapping;
-import com.demkom58.springram.controller.config.PathMatchingConfigurer;
 import com.demkom58.springram.controller.message.MessageType;
 import com.demkom58.springram.controller.annotation.ExceptionHandler;
 import com.demkom58.springram.controller.method.HandlerMapping;
@@ -15,7 +14,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.PathMatcher;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -29,15 +27,9 @@ import java.util.*;
  */
 @Component
 public class ExceptionHandlerContainer {
+    private static final Logger log = LoggerFactory.getLogger(ExceptionHandlerContainer.class);
 
-    record Type(@Nullable String throwableClassName, @Nullable MessageType type, @Nullable String chain, String value) {
-        static final Type EMPTY_TYPE = new Type(null, null, null, "");
-    }
-
-    private static final Logger log = LoggerFactory.getLogger(CommandHandlerContainer.class);
-
-    private final Map<Type, TelegramMessageHandler> typeHandlerMap = new HashMap<>();
-    private PathMatchingConfigurer pathMatchingConfigurer = new PathMatchingConfigurer();
+    private final ExceptionHandlerMap handlerMap = new ExceptionHandlerMap();
 
     /**
      * Registers exception handler method of the specified bean.
@@ -56,7 +48,7 @@ public class ExceptionHandlerContainer {
 
         final String[] exceptions = readExceptions(method);
         final String[] chains = readChains(beanClass, method);
-        final Set<String> paths = readPaths(beanClass, typeMapping, methodMapping);
+        final Set<String> paths = readPaths(typeMapping, methodMapping);
         final MessageType[] events = readMessageTypes(typeMapping, methodMapping);
 
         for (String ex : exceptions) {
@@ -72,10 +64,7 @@ public class ExceptionHandlerContainer {
         }
     }
 
-
-    private Set<String> readPaths(Class<?> beanClass,
-                                  @Nullable CommandMapping typeMapping,
-                                  @Nullable CommandMapping methodMapping) {
+    private Set<String> readPaths(@Nullable CommandMapping typeMapping, @Nullable CommandMapping methodMapping) {
         if (methodMapping == null) {
             return Collections.singleton("");
         }
@@ -94,18 +83,6 @@ public class ExceptionHandlerContainer {
         } else {
             for (String mappedPath : mappingValues) {
                 paths.add(mappedPath.toLowerCase());
-            }
-        }
-
-        final PathMatcher pathMatcher = pathMatchingConfigurer.getPathMatcher();
-        for (String mappingValue : paths) {
-            final String[] cmd = mappingValue.split(" ", 2);
-            final boolean isPattern = pathMatcher.isPattern(cmd[0]);
-            if (isPattern) {
-                throw new IllegalArgumentException(
-                        "CommandMapping method with mappings (" + String.join(", ", mappingValue) + ") in class "
-                                + beanClass.getName() + " can't has pattern as first value!"
-                );
             }
         }
 
@@ -176,13 +153,12 @@ public class ExceptionHandlerContainer {
         }
 
         for (MessageType messageType : types) {
-            Type type = new Type(throwableClassName, messageType, chain, value);
-
-            log.trace("Adding exception method handler for type {}", type);
-            final boolean registered = typeHandlerMap.putIfAbsent(type, handlerMethod) == null;
+            log.trace("Adding exception method handler for (throwable: {}, type: {}, chain: {}, path: {})",
+                    throwableClassName, messageType, chain, value);
+            final boolean registered = handlerMap.put(throwableClassName, messageType, chain, value, handlerMethod);
             if (!registered) {
-                throw new PathAlreadyTakenException("Cant register handler with type '"
-                        + type + "' for method '" + handlerMethod.getMethod().getName() + "'");
+                throw new PathAlreadyTakenException("Cant register handler method '"
+                        + handlerMethod.getMethod().getName() + "'");
             }
         }
     }
@@ -200,42 +176,7 @@ public class ExceptionHandlerContainer {
                                               @Nullable MessageType method,
                                               @Nullable String chain,
                                               String value) {
-        boolean methodNotNull = method != null;
-        boolean valueNotEmpty = !value.isEmpty();
-
-        TelegramMessageHandler handler = typeHandlerMap.get(new Type(ex.getName(), method, chain, value));
-        if (handler == null && methodNotNull) {
-            handler = typeHandlerMap.get(new Type(ex.getName(), null, chain, value));
-        }
-
-        if (handler == null && valueNotEmpty) {
-            handler = typeHandlerMap.get(new Type(ex.getName(), method, chain, ""));
-        }
-
-        if (handler == null && methodNotNull && valueNotEmpty) {
-            handler = typeHandlerMap.get(new Type(ex.getName(), null, chain, ""));
-        }
-
-        if (handler == null) {
-            handler = typeHandlerMap.get(Type.EMPTY_TYPE);
-        }
-
-        return handler;
-    }
-
-    public TelegramMessageHandler getHandler(@Nullable Class<? extends Throwable> ex,
-                                             @Nullable MessageType method,
-                                             @Nullable String chain,
-                                             String value) {
-        return typeHandlerMap.get(new Type(ex == null ? null : ex.getName(), method, chain, value));
-    }
-
-    public PathMatchingConfigurer getPathMatchingConfigurer() {
-        return pathMatchingConfigurer;
-    }
-
-    public void setPathMatchingConfigurer(PathMatchingConfigurer pathMatchingConfigurer) {
-        this.pathMatchingConfigurer = pathMatchingConfigurer;
+        return handlerMap.get(ex.getName(), method, chain, value);
     }
 
 }
