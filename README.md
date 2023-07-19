@@ -10,7 +10,7 @@
 [ ![license][] ](https://github.com/demkom58/springram/blob/master/LICENSE)
 [ ![jitpack][] ](https://jitpack.io/#demkom58/springram)
 
-<img align="right" src="https://i.ibb.co/mGrR6V5/logo.png" height="100" width="100" alt="Springram Logo">
+<img align="right" src="https://raw.githubusercontent.com/demkom58/springram/web/logo.svg" height="100" width="100" alt="Springram Logo">
 
 # Springram
 Springram is a telegram framework based on the Spring framework and Spring Boot.
