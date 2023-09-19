@@ -1,0 +1,2 @@
+com.demkom58.springram.config.TelegramBotAutoConfiguration
+com.demkom58.springram.controller.config.SpringramAutoConfiguration
